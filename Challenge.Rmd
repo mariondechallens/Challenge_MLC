@@ -1,0 +1,53 @@
+---
+title: "Challenge Machine Learning : Classification en phase de sommeil avec Dreem"
+author: "Marion Favre d'Echallens et Jean-Louis Truong"
+date: "7 janvier 2019"
+output:
+  pdf_document: default
+---
+
+## Introduction
+
+Ce challenge est réalisé en partenariat avec l'entreprise Dreem qui est une start-up spécialisée dans l'amélioration du sommeil des personnes.
+
+### Contexte du challenge
+
+Ce challenge consiste à réaliser de la classification en stades de sommeil. Une nuit voit défiler plusieurs cycles de sommeil qui se composent tous d'une phase : 
++ d'éveil
++ de sommeil léger
++ de sommeil profond 
++ de sommeil paradoxal. 
+
+Un moyen de mesurer le sommeil est d'utiliser le polysomnographe qui relève notamment l'activité du cerveau, le mouvement des yeux et la tension musculaire afin d'évaluer la qualité du sommeil d'une personne.
+
+Dans cette optique de mesure, la société Dreem a développé un bandeau qui fonctionne comme le polysomnographe et qui permet de mesurer trois types de signaux: 
++ l'activité électrique du cerveau grâce à un électro-encéphalogramme (EEG)
++ le mouvement la position, la respiration grâce à un acceléromètre
++ les battements sanguins grâce à un oxymètre de pouls.
+
+### Le challenge
+
+Ce bandeau enregistre donc une certaines quantité de données par nuit et l'objectif de ce challenge est de développer un algorithme permettant, à partir des données de 30 secondes d'enregistrement du bandeau, dans quel stade de sommeil parmi les quatre cités plus haut se trouve la personne.
+
+Nous avons pour cela à notre disposition 7 enregistrements d'encéphalogramme, 1 enregristrement d'oxymètre et 3 enregistrement d'accéléromètre. Ces enregistrements sont de 30 secondes et ils sont labellisés i.e. nous connaissons le stade de sommeil associé.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
