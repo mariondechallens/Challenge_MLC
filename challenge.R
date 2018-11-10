@@ -17,9 +17,10 @@ list.datasets(xtrain)
 list.groups(xtrain)
 list.attributes(xtrain)
 
-xeeg1 =  xtrain["/eeg1"]
-xeeg1[]
+accx = xtrain[list.datasets(xtrain, recursive = TRUE)[1]]
 
-list.datasets(xtrain)
+s=as.data.frame(sapply(list.datasets(xtrain, recursive = TRUE)[1], function(x) xtrain[x][]))
+
+
 
 h5close(xtrain)
