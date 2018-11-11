@@ -51,13 +51,11 @@ xtrain = h5file(name = paste0(data_folder,"train.h5/train.h5"))
 list.datasets(xtrain)
 ```
 
-L'objet `xtrain` contient les onze datasets à exploiter. Pour ce faire, nous les transformons en `dataframe`.
+L'objet `xtrain` contient les onze datasets à exploiter. Pour ce faire, nous les transformons en `dataframe` afin de les utiliser.
 
 ```{r Données 2}
 eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
 eeg1 = as.data.frame(readDataSet(eeg1))
-eeg1_y = cbind(eeg1,ytrain[,2])
-colnames(eeg1_y)[ncol(eeg1_y)] = "y"
 ```
 
 On peut observer le premier enregistrement ci-dessous.

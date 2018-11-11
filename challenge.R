@@ -13,29 +13,39 @@ library(h5,warn.conflicts = FALSE)
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
 xtrain = h5file(name = paste0(data_folder,"train.h5/train.h5"))
-list.datasets(xtrain)
-list.groups(xtrain)
-list.attributes(xtrain)
+l=list.datasets(xtrain)
 
-eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
-eeg1=as.data.frame(readDataSet(eeg1))
+df = ytrain
 
-eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
-eeg1=as.data.frame(readDataSet(eeg1))
+##Création de features : moyennes et écart types des 30 sec d'enregistrements
+j = 2
+for (i in 1:length(l))
+{
+  print(i)
+  data = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[i]]))
+  df[,i+j] = rowMeans(data)
+  df[,i+j+1] = apply(data, 1,sd, na.rm = TRUE)
+  j = j + 1
+}
+rm(data)
+features = c("accx_mean","accx_std","accy_mean","accy_std","accz_mean","accz_std",
+             "eeg1_mean","eeg1_std","eeg2_mean","eeg2_std","eeg3_mean","eeg3_std",
+             "eeg4_mean","eeg4_std","eeg5_mean","eeg5_std","eeg6_mean","eeg6_std",
+             "eeg7_mean","eeg7_std","oxy_mean","oxy_std")
+colnames(df)[3:ncol(df)] = features
 
-eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
-eeg1=as.data.frame(readDataSet(eeg1))
+# accx = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[1]]))
+# accy = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[2]]))
+# accz = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[3]]))
+# eeg1 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[4]]))
+# eeg2 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[5]]))
+# eeg3 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[6]]))
+# eeg4 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[7]]))
+# eeg5 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[8]]))
+# eeg6 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[9]]))
+# eeg7 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[10]]))
+# oxy = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[11]]))
 
-eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
-eeg1=as.data.frame(readDataSet(eeg1))
-
-eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
-eeg1=as.data.frame(readDataSet(eeg1))
-
-plot(1:ncol(eeg1), eeg1[1, ], type = 'l') #permière ligne
-plot(1:ncol(e), e[1, ], type = 'l')
-ey=cbind(e,ytrain[,2])
-colnames(ey)[1501] = "y"
 lm1 = glm(ey$y~.,data = ey,family = "binomial")
 summary(lm1) #faire des moyennes par enregistrement?
 
