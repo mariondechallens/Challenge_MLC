@@ -8,19 +8,35 @@
 # setwd("~/GitHub/Challenge_MLC")
 # render("Challenge.Rmd")
 
-library(h5)
+library(h5,warn.conflicts = FALSE)
 
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
-xtrain = h5file(paste0(data_folder,"train.h5/train.h5"))
+xtrain = h5file(name = paste0(data_folder,"train.h5/train.h5"))
 list.datasets(xtrain)
 list.groups(xtrain)
 list.attributes(xtrain)
 
-accx = xtrain[list.datasets(xtrain, recursive = TRUE)[1]]
+eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
+eeg1=as.data.frame(readDataSet(eeg1))
 
-s=as.data.frame(sapply(list.datasets(xtrain, recursive = TRUE)[1], function(x) xtrain[x][]))
+eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
+eeg1=as.data.frame(readDataSet(eeg1))
 
+eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
+eeg1=as.data.frame(readDataSet(eeg1))
 
+eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
+eeg1=as.data.frame(readDataSet(eeg1))
+
+eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
+eeg1=as.data.frame(readDataSet(eeg1))
+
+plot(1:ncol(eeg1), eeg1[1, ], type = 'l') #permière ligne
+plot(1:ncol(e), e[1, ], type = 'l')
+ey=cbind(e,ytrain[,2])
+colnames(ey)[1501] = "y"
+lm1 = glm(ey$y~.,data = ey,family = "binomial")
+summary(lm1) #faire des moyennes par enregistrement?
 
 h5close(xtrain)

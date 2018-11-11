@@ -6,7 +6,7 @@ output:
   pdf_document: default
 ---
 
-## Introduction
+## 1. Introduction
 
 Ce challenge est réalisé en partenariat avec l'entreprise Dreem qui est une start-up spécialisée dans l'amélioration du sommeil des personnes.
 
@@ -29,25 +29,38 @@ Dans cette optique de mesure, la société Dreem a développé un bandeau qui foncti
 
 Ce bandeau enregistre donc une certaines quantité de données par nuit et l'objectif de ce challenge est de développer un algorithme permettant, à partir des données de 30 secondes d'enregistrement du bandeau, dans quel stade de sommeil parmi les quatre cités plus haut se trouve la personne.
 
-Nous avons pour cela à notre disposition 7 enregistrements d'encéphalogramme (sept positions différentes sur la tête), 1 enregristrement d'oxymètre et 3 enregistrement d'accéléromètre. Ces enregistrements sont de 30 secondes et ils sont labellisés i.e. nous connaissons le stade de sommeil associé.
+Nous avons pour cela à notre disposition 7 enregistrements d'encéphalogramme (sept positions différentes sur la tête), 1 enregistrement d'oxymètre et 3 enregistrement d'accéléromètre. Ces enregistrements sont de 30 secondes et ils sont labellisés i.e. nous connaissons le stade de sommeil associé.
 
+## 2. Prétraitement des données
+
+Les données sont présentées sous le format h5 afin de faciliter leur manipulation au vu de leur taille trés volumineuse.
+Nous disposons en effet de sept bases de données d'enregistrements d'encéphalogrammes contenant chacun 38289 lignes de 1500 valeurs, ce qui correspond à une fréquence de 50Hz. Les quatres autres bases de données ne contiennent que 300 valeurs par enregistrement (fréquence de 10Hz).
+
+Afin de lire et manipuler ces données, nous utilisons le package `h5`de R.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-
-```{r cars}
-summary(cars)
+```{r Données}
+library(h5,warn.conflicts = FALSE)
+data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
+ytrain = read.csv(paste0(data_folder,"train_y.csv"))
+xtrain = h5file(name = paste0(data_folder,"train.h5/train.h5"))
+list.datasets(xtrain)
 ```
 
-## Including Plots
+L'objet `xtrain` contient les onze datasets à exploiter. Pour ce faire, nous les transformons en `dataframe`.
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r Données 2}
+eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
+eeg1 = as.data.frame(readDataSet(eeg1))
+eeg1_y = cbind(eeg1,ytrain[,2])
+colnames(eeg1_y)[ncol(eeg1_y)] = "y"
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+On peut observer le premier enregistrement ci-dessous.
+```{r Plot EEG1, echo = FALSE}
+plot(1:ncol(eeg1), eeg1[1, ], type = 'l', ylab = "Valeur de l'EEG", xlab = "Numéro d'enregistrement sur 30 secondes", main = "EEG position 1 - enregist. 1")
+```
