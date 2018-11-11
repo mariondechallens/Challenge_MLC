@@ -75,11 +75,36 @@ lm1 = glm(df$sleep_stage~.,data = df[-1],family = poisson())
 summary(lm1) #faire des moyennes par enregistrement?
 anova(lm1,test="Chisq")
 
-p = predict (lm1, newdata = dftest, type = "response") 
+lm2 = glm(df$sleep_stage~ oxy_std + eeg6_std + eeg4_std + accz_std + accy_mean ,data = df[-1],family = poisson())
+summary(lm2)
+
+p = predict (lm2, newdata = dftest, type = "response") 
 yhat = round(p)
-pred.ok = (dftest$sleep_stage == yhat)
-plot (yhat, dftest$sleep_stage, pch = 21, bg = c ("red", "green3")[pred.ok + 1])
 res = as.data.frame(cbind(yrandom$id,yhat))
 colnames(res)=c("id","sleep_stage")
 write.csv(res,file = paste0(data_folder,"res1.csv"),row.names = FALSE)
+
+##cross validation
+#Randomly shuffle the data
+dfCV<-df[sample(nrow(df)),]
+
+#Create 10 equally size folds
+folds <- cut(seq(1,nrow(dfCV)),breaks=10,labels=FALSE)
+
+#Perform 10 fold cross validation
+erreur = rep(0,10)
+for(i in 1:10){
+  #Segement your data by fold using the which() function 
+  testIndexes <- which(folds==i,arr.ind=TRUE)
+  testData <- dfCV[testIndexes, ]
+  trainData <- dfCV[-testIndexes, ]
+  #Use the test and train data partitions however you desire...
+  glmCV = glm(trainData$sleep_stage~ oxy_std + eeg6_std + eeg4_std + accz_std + accy_mean ,data = trainData[-1],family = poisson())
+  p = predict (glmCV, newdata = testData, type = "response") 
+  yhat =round(p)
+  erreur[i] = sum((yhat != testData$sleep_stage))/length(yhat)
+}
+
+etot = mean(erreur)*100
+
 h5close(xtrain)
