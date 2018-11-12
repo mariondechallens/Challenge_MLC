@@ -153,7 +153,7 @@ cl = kmeans(df[,3:ncol(df)],5)
 kstage = cl$cluster
 centres = cl$centers
 
-#a quel etat de sommeil correspond les clusters?
+#À quel etat de sommeil correspond les clusters?
 ksleep_stage = ytrain[]
 ytrain2 = cbind(ytrain,kstage)
 erreur = sum(kstage != ytrain$sleep_stage)/length(stage)*100
