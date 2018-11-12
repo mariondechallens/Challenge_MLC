@@ -19,16 +19,54 @@ l=list.datasets(xtrain)
 l2 = list.datasets(xtest)
 
 df = ytrain
-dftest = ytest
+dftest = yrandom
 
-##Création de features : moyennes et écart types des 30 sec d'enregistrements
+##Création de features 
+## entropie du signal (théorie à détailler)
+# quo = proba d'un phénomene aleatoire x[i]
+entropie1 = function(x){
+  x = as.numeric(x)
+  tot = 0
+  ent = 0
+  for (i in 1:length(x))
+    tot = tot + x[i]^2
+  
+  for (i in 1:length(x))
+    quo = x[i]^2 / tot
+    ent = ent + (quo * log10(quo))
+    
+  return (-ent)  
+}
+
+entropie2 = function(x){
+  x = as.numeric(x)
+  m = mean(x)
+  ent = 0
+  for (i in 1:length(x))
+    quo = abs(x[i] - m)
+    ent = ent + (quo * log10(quo))
+  
+  return (-ent)  
+}
+
+## deviation absolue par rapport à la moyenne
+abs_deviation = function(x)
+{
+  as.numeric(x)
+  res = 0
+  m = mean(x)
+  for (i in 1:length(x))
+    res = res + abs(x[i] - m)
+  return (res/length(x))
+}
+
 j = 2
 for (i in 1:length(l))
 {
   print(i)
   data = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[i]]))
-  df[,i+j] = rowMeans(data)
-  df[,i+j+1] = apply(data, 1,sd, na.rm = TRUE)
+  df[,i+j] = apply(data, 1,entropie2)
+  df[,i+j+1] = apply(data, 1,abs_deviation)
   j = j + 1
 }
 rm(data)
@@ -38,16 +76,16 @@ for (i in 1:length(l2))
 {
   print(i)
   data = as.data.frame(readDataSet(xtest[list.datasets(xtest, recursive = TRUE)[i]]))
-  dftest[,i+j] = rowMeans(data)
-  dftest[,i+j+1] = apply(data, 1,sd, na.rm = TRUE)
+  dftest[,i+j] = apply(data,1,entropie2)
+  dftest[,i+j+1] = apply(data, 1, abs_deviation)
   j = j + 1
 }
 rm(data)
 
-features = c("accx_mean","accx_std","accy_mean","accy_std","accz_mean","accz_std",
-             "eeg1_mean","eeg1_std","eeg2_mean","eeg2_std","eeg3_mean","eeg3_std",
-             "eeg4_mean","eeg4_std","eeg5_mean","eeg5_std","eeg6_mean","eeg6_std",
-             "eeg7_mean","eeg7_std","oxy_mean","oxy_std")
+features = c("accx_ent2","accx_absstd","accy_ent2","accy_absstd","accz_ent2","accz_absstd",
+             "eeg1_ent2","eeg1_absstd","eeg2_ent2","eeg2_absstd","eeg3_ent2","eeg3_absstd",
+             "eeg4_ent2","eeg4_absstd","eeg5_ent2","eeg5_absstd","eeg6_ent2","eeg6_absstd",
+             "eeg7_ent2","eeg7_absstd","oxy_ent2","oxy_absstd")
 colnames(df)[3:ncol(df)] = features
 colnames(dftest)[3:ncol(dftest)] = features
 dftest = dftest[3:ncol(dftest)]
@@ -64,8 +102,8 @@ dftest = dftest[3:ncol(dftest)]
 # eeg7 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[10]]))
 # oxy = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[11]]))
 
-#write.csv(df,file = paste0(data_folder,"df1.csv"),row.names = FALSE)
-#file = read.csv(paste0(data_folder,"df1.csv"))
+#write.csv(df,file = paste0(data_folder,"df2.csv"),row.names = FALSE)
+#df = read.csv(paste0(data_folder,"df2.csv"))
 #write.csv(dftest,file = paste0(data_folder,"df1test.csv"),row.names = FALSE)
 
 boxplot (eeg1_std ~ sleep_stage, data = df) 
@@ -75,10 +113,13 @@ lm1 = glm(df$sleep_stage~.,data = df[-1],family = poisson())
 summary(lm1) #faire des moyennes par enregistrement?
 anova(lm1,test="Chisq")
 
-lm2 = glm(df$sleep_stage~ oxy_std + eeg6_std + eeg4_std + accz_std + accy_mean ,data = df[-1],family = poisson())
+lm2 = glm(df$sleep_stage~ accx_absstd + eeg2_absstd + accz_absstd  + accz_ent2  + eeg2_ent2 + eeg3_ent2  ,data = df[-1],family = poisson())
 summary(lm2)
 
-p = predict (lm2, newdata = dftest, type = "response") 
+lm3 = glm(df$sleep_stage~ accx_absstd + accz_absstd  + accz_ent2 ,data = df[-1],family = poisson())
+summary(lm3)
+
+p = predict (lm3, newdata = dftest, type = "response") 
 yhat = round(p)
 res = as.data.frame(cbind(yrandom$id,yhat))
 colnames(res)=c("id","sleep_stage")
@@ -99,12 +140,22 @@ for(i in 1:10){
   testData <- dfCV[testIndexes, ]
   trainData <- dfCV[-testIndexes, ]
   #Use the test and train data partitions however you desire...
-  glmCV = glm(trainData$sleep_stage~ oxy_std + eeg6_std + eeg4_std + accz_std + accy_mean ,data = trainData[-1],family = poisson())
+  glmCV = glm(trainData$sleep_stage~ accx_absstd + accz_absstd  + accz_ent2 ,data = trainData[-1],family = poisson())
   p = predict (glmCV, newdata = testData, type = "response") 
   yhat =round(p)
   erreur[i] = sum((yhat != testData$sleep_stage))/length(yhat)
 }
 
 etot = mean(erreur)*100
+
+##k means
+cl = kmeans(df[,3:ncol(df)],5)
+kstage = cl$cluster
+centres = cl$centers
+
+#a quel etat de sommeil correspond les clusters?
+ksleep_stage = ytrain[]
+ytrain2 = cbind(ytrain,kstage)
+erreur = sum(kstage != ytrain$sleep_stage)/length(stage)*100
 
 h5close(xtrain)

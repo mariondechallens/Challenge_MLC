@@ -60,5 +60,5 @@ eeg1 = as.data.frame(readDataSet(eeg1))
 
 On peut observer le premier enregistrement ci-dessous.
 ```{r Plot EEG1, echo = FALSE}
-plot(1:ncol(eeg1), eeg1[1, ], type = 'l', ylab = "Valeur de l'EEG", xlab = "Numéro d'enregistrement sur 30 secondes", main = "EEG position 1 - enregist. 1")
+plot(1:ncol(eeg1), eeg1[1, ], type = 'l', ylab = "Amplitude en uV", xlab = "Numéro d'enregistrement sur 30 secondes", main = "EEG position 1 - enregist. 1")
 ```

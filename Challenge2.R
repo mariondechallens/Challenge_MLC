@@ -22,22 +22,30 @@ l2 = list.datasets(xtest)
 # eeg7 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[10]]))
 # oxy = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[11]]))
 
-
+#enregistrer les plots par stade et par signal
 for (i in 1:length(l))
 {
-  print(l[i])
   data = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[i]]))
   data_y = cbind(data,ytrain)
   for (j in 0:4){
-    print(paste0("Stade: ",j))
+    print(paste0(l[i]," Stade: ",j))
     data_y_stadej = subset(data_y, data_y$sleep_stage == j)
-    for (k in 1:10)
+    # for (k in 1:10)
+    # {
+    #   print(k)
+    #   jpeg(paste0(data_folder,"Plots/stade",j,"/",l[i],"_stade ",j,"_",k,".jpeg"),res = 450, height =  12, width = 16, units = 'cm')
+    #   plot(1:ncol(data),data_y_stadej[k,1:ncol(data)],main = paste0(l[i],"_stade ",j,"_",k),ylab=paste0(l[i]," value"),xlab = "num de relevé sur 30 sec",type="l")
+    #   dev.off()
+    # }
+
+    for (m in 1:10)
     {
-      print(k)
-      jpeg(paste0(data_folder,"Plots/Stade",j,"/",l[i],"_stade ",j,"_",k,".jpeg"),res = 450, height =  12, width = 16, units = 'cm')
-      plot(1:ncol(data),data_y_stadej[i,1:ncol(data)],main = paste0(l[i],"_stade ",j,"_",k),ylab=paste0(l[i]," value"),xlab = "num de relevé sur 30 sec",type="l")
+      print(m)
+      jpeg(paste0(data_folder,"Plots/signal",i,"/",l[i],"_stade ",j,"_",m,".jpeg"),res = 450, height =  12, width = 16, units = 'cm')
+      plot(1:ncol(data),data_y_stadej[m,1:ncol(data)],main = paste0(l[i],"_stade ",j,"_",m),ylab=paste0(l[i]," value"),xlab = "num de relevé sur 30 sec",type="l")
       dev.off()
     }
+    
         }
   
 }
