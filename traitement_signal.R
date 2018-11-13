@@ -121,23 +121,6 @@ ent_acc_oxy = read.csv(paste0(data_folder,"mmd_esis_acc_oxy.csv"))
 # colnames(df2)[3:ncol(df2)] = features
 # write.csv(df2,file = paste0(data_folder,"mmd_esis_acc_oxy.csv"),row.names = FALSE)
 
-ytrain2 = cbind(ytrain,kstage2)
-ytrain2$ktrad = rep(0,nrow(ytrain2))
-for (i in 1:nrow(ytrain2))
-{
-  if (ytrain2$kstage2[i] == 1)
-    ytrain2$ktrad[i] = 4
-  
-  if (ytrain2$kstage2[i] == 3)
-    ytrain2$ktrad[i] = 0
-  
-  else 
-  {
-    ytrain2$ktrad[i] = sample(1:3,1)
-  }
-}
-
-erreur = sum(ytrain2$ktrad != ytrain2$sleep_stage)/nrow(ytrain2)*100
 
 Kmeans = function(data,k)
 {
@@ -201,3 +184,25 @@ erreur = sum(res$trad != res$sleep_stage)/nrow(res)*100
 # theta = 4 - 8 Hz 1,2,3  --> 1,2
 # delta = 0 - 4 Hz 1,2,3 -->1,2
 
+comparer_stades = function(df)
+{
+  for (i in 3:ncol(df))
+  {
+    print(i)
+    par(mfrow=c(3,2))
+    for (k in 0:4)
+      plot(as.numeric(subset(df,df$sleep_stage == k)[,i]),ylab = colnames(df)[i],main = paste0("Stade ",k),type = "l")
+    #boxplot(f_eeg[,i]~sleep_stage,data = f_eeg, ylab = colnames(f_eeg)[i])
+  }
+  par(mfrow=c(1,1))
+}
+
+boxplots = function(df)
+{
+  for (i in 3:ncol(df))
+    boxplot(df[,i]~sleep_stage,data = df, ylab = colnames(df)[i])
+}
+
+boxplots(ent_acc_oxy)
+comparer_stades(ent_acc_oxy)
+  
