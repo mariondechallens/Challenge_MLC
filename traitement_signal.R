@@ -131,37 +131,60 @@ Kmeans = function(data,k)
   return (list(cluster = cl,kstage = kstage, centres=centres))
 }
 
-K_eeg_freq = Kmeans(f_eeg[,3:ncol(f_eeg)],5)
-View(K_eeg_freq$centres)
+K_eeg_freq = Kmeans(f_eeg[,3:ncol(f_eeg)],3)
+centres_eeg_freq = as.data.frame(K_eeg_freq$centres)
+centres_eeg_freq$moy = apply(centres_eeg_freq,1,mean)
+cluster_min = which(centres_eeg_freq$moy == min(centres_eeg_freq$moy))
 
-K_eeg_ent = Kmeans(ent_eeg[,3:ncol(ent_eeg)],2)
+K_eeg_ent = Kmeans(ent_eeg[,3:ncol(ent_eeg)],3)
 View(K_eeg_ent$centres)
+
+
+K_acc_freq = Kmeans(f_acc_oxy[,c("aacx_freq","accy_freq","accz_freq")],2)
+View(K_acc_freq$centres)
+centres_acc_freq = as.data.frame(K_acc_freq$centres)
+centres_acc_freq$moy = apply(centres_acc_freq,1,mean)
+cluster_min2 = which(centres_acc_freq$moy == min(centres_acc_freq$moy))
+
 
 K_acc_ent = Kmeans(ent_acc_oxy[,3:8],2)
 View(K_acc_ent$centres)
 
-K_oxy_freq = Kmeans(f_acc_oxy[,"oxy_freq"],3)
+K_oxy_freq = Kmeans(f_acc_oxy[,"oxy_freq"],2)
 View(K_oxy_freq$centres)
 
-K_oxy_ent =  Kmeans(ent_acc_oxy[,c("oxy_mmd","oxy_esis")],3)
+K_oxy_ent =  Kmeans(ent_acc_oxy[,c("oxy_mmd","oxy_esis")],2)
 View(K_oxy_ent$centres)
 
 res = ytrain
 res$freq_eeg = K_eeg_freq$kstage
 res$ent_eeg = K_eeg_ent$kstage
 res$ent_acc = K_acc_ent$kstage
+res$acc_freq =  K_acc_freq$kstage
 res$freq_oxy = K_oxy_freq$kstage
 res$ent_ocy = K_oxy_ent$kstage
 res$trad = rep(0,nrow(res))
 
-traduire = function(res,n)
+classif_stade = function(n)
+{
+  sdt = subset(res,sleep_stage == n)
+  for (i in 3:8)
+    plot(sdt[,i],ylab = colnames(sdt)[i], main= paste0("Clusters stade ",n))
+}
+
+classif_stade(0) #ent eeg, acc freq, ent oxy
+classif_stade(1) # ent oxy, acc freq, ent acc, ent eeg, freq eeg un peu
+classif_stade(2) #ent oxy, ent acc, ent eeg, 
+classif_stade(3) #ent oxy, acc freq, ent acc, ent eeg, 
+classif_stade(4) # ent oxy, ent acc, ent egg, 
+
+traduire = function(res)
 {
   for (i in 1:nrow(res))
   {
-    ligne = res[i,3:ncol(res)]
-    if (sum(ligne == c(4,1,2,3,3)) >=n || sum(ligne == c(4,2,2,3,3))>=n)
-      res$trad[i] = 0
-    if (sum(ligne == c(3,2,2,1,1))>=n)
+    if (res[i,"freq_eeg"] == cluster_min)
+      res$trad[i] = 1
+    if (res[i,"acc_freq"] == cluster_min2)
       res$trad[i] = 1
     if (sum(ligne == c(1,1,1,1,1))>=n)
       res$trad[i] = 2
