@@ -1,4 +1,5 @@
 library(h5,warn.conflicts = FALSE)
+library(seewave)
 
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
@@ -9,7 +10,7 @@ l=list.datasets(xtrain)
 l2 = list.datasets(xtest)
 
 accx = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[1]]))
-x = eeg1[5,]
+x = accx[17,]
 plot(as.numeric(x),type="l",ylab="Amplitude en uV")
 ##idée : identifier les ondes beta, alpha etc avec leur amplitude et fréquence
 
@@ -64,6 +65,16 @@ frequence = function(x,pp=FALSE){
 }
 frequence(x,TRUE)
 
+frequence2 = function(x)
+{
+  f = as.data.frame(seewave::spec(as.numeric(x),f = 10,plot = FALSE)) #pkg seewave
+  maxi = max(f$y)
+  freq = subset(f,f$y == maxi)$x*1000
+  return(freq)
+}
+
+frequence2(x)
+
 Esis = function(x)  
 {
   x = as.numeric(x)
@@ -84,42 +95,52 @@ Esis = function(x)
 
 Esis(x)
 
-# df=ytrain
-# j=3
-# for (i in c(1,2,3,11))
-# {
-#   print(i)
-#   data = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[i]]))
-#   df[,j] = apply(data, 1,frequence)
-#   j = j +1
-# }
-# rm(data)
-# features = c("aacx_freq","accy_freq","accz_freq","oxy_freq")
-# colnames(df)[3:ncol(df)] = features
-# write.csv(df,file = paste0(data_folder,"freq_acc_oxy.csv"),row.names = FALSE)
+df=ytrain
+j=3
+for (i in 4:10)
+{
+  print(i)
+  data = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[i]]))
+  df[,j] = apply(data, 1,frequence2) #ATTENTION CHANGER LE f DANS FREQUENCE2
+  j = j +1
+}
+rm(data)
+#features = c("aacx_freq","accy_freq","accz_freq","oxy_freq")
+features = c("eeg1_freq","eeg2_freq","eeg3_freq","eeg4_freq",
+             "eeg5_freq","eeg6_freq","eeg7_freq")
+colnames(df)[3:ncol(df)] = features
+write.csv(df,file = paste0(data_folder,"freq_eeg2.csv"),row.names = FALSE)
 
 f_eeg = read.csv(paste0(data_folder,"freq_eeg.csv"))
 f_acc_oxy = read.csv(paste0(data_folder,"freq_acc_oxy.csv"))
 ent_eeg = read.csv(paste0(data_folder,"mmd_esis_eeg.csv"))
 ent_acc_oxy = read.csv(paste0(data_folder,"mmd_esis_acc_oxy.csv"))
 
-# df2 = ytrain
-# j=3
-# k=0
-# for (i in c(1,2,3,11))
-# {
-#   print(i)
-#   data = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[i]]))
-#   df2[,j+k] = apply(data, 1,MMD)
-#   df2[,j+k+1] = apply(data, 1,Esis)
-#   j = j + 1
-#   k = k + 1
-# }
-# rm(data)
-# features = c("accx_mmd","accx_esis","accy_mmd","accy_esis","accz_mmd","accz_esis",
-#              "oxy_mmd","oxy_esis")
-# colnames(df2)[3:ncol(df2)] = features
-# write.csv(df2,file = paste0(data_folder,"mmd_esis_acc_oxy.csv"),row.names = FALSE)
+f_eeg_test = read.csv(paste0(data_folder,"freq_eeg_test.csv"))
+f_acc_oxy_test = read.csv(paste0(data_folder,"freq_acc_oxy_test.csv"))
+ent_eeg_test = read.csv(paste0(data_folder,"mmd_esis_eeg_test.csv"))
+ent_acc_oxy_test = read.csv(paste0(data_folder,"mmd_esis_acc_oxy_test.csv"))
+
+df2 = yrandom
+j=3
+k=0
+for (i in c(1,2,3,11))
+{
+  print(i)
+  data = as.data.frame(readDataSet(xtest[list.datasets(xtest, recursive = TRUE)[i]]))
+  df2[,j+k] = apply(data, 1,MMD)
+  df2[,j+k+1] = apply(data, 1,Esis)
+  j = j + 1
+  k = k + 1
+}
+rm(data)
+features = c("accx_mmd","accx_esis","accy_mmd","accy_esis","accz_mmd","accz_esis",
+             "oxy_mmd","oxy_esis")
+# features = c("eeg1_mmd","eeg1_esis","eeg2_mmd","eeg2_esis","eeg3_mmd","eeg3_esis",
+#              "eeg4_mmd","eeg4_esis","eeg5_mmd","eeg5_esis","eeg6_mmd","eeg6_esis",
+#             "eeg7_mmd","eeg7_esis")
+colnames(df2)[3:ncol(df2)] = features
+write.csv(df2,file = paste0(data_folder,"mmd_esis_acc_oxy_test.csv"),row.names = FALSE)
 
 
 Kmeans = function(data,k)
@@ -131,10 +152,13 @@ Kmeans = function(data,k)
   return (list(cluster = cl,kstage = kstage, centres=centres))
 }
 
-K_eeg_freq = Kmeans(f_eeg[,3:ncol(f_eeg)],3)
+K_eeg_freq = Kmeans(f_eeg[,3:ncol(f_eeg)],5)
 centres_eeg_freq = as.data.frame(K_eeg_freq$centres)
 centres_eeg_freq$moy = apply(centres_eeg_freq,1,mean)
 cluster_min = which(centres_eeg_freq$moy == min(centres_eeg_freq$moy))
+
+K_eeg_freq_t = Kmeans(f_eeg_test[,3:ncol(f_eeg_test)],5)
+View(K_eeg_freq_t$centres)
 
 K_eeg_ent = Kmeans(ent_eeg[,3:ncol(ent_eeg)],3)
 View(K_eeg_ent$centres)
@@ -178,34 +202,28 @@ classif_stade(2) #ent oxy, ent acc, ent eeg,
 classif_stade(3) #ent oxy, acc freq, ent acc, ent eeg, 
 classif_stade(4) # ent oxy, ent acc, ent egg, 
 
-traduire = function(res)
+ytest = yrandom
+traduire = function(ytest)
 {
-  for (i in 1:nrow(res))
+  for (i in 1:nrow(ytest))
   {
-    if (res[i,"freq_eeg"] == cluster_min)
-      res$trad[i] = 1
-    if (res[i,"acc_freq"] == cluster_min2)
-      res$trad[i] = 1
-    if (sum(ligne == c(1,1,1,1,1))>=n)
-      res$trad[i] = 2
-    if (sum(ligne == c(5,1,1,1,1))>=n)
-      res$trad[i] = 3
-    if (sum(ligne == c(2,2,2,2,2))>=n)
-      res$trad[i] = 4
-    else 
-      res$trad[i] = sample(0:4,1)
+    clusteri = K_eeg_freq_t$cluster$cluster[i]
+    if (clusteri == 5)
+      ytest[i,2] = 3
+    if (clusteri == 1)
+      ytest[i,2] = 2
+    if (clusteri == 3)
+      ytest[i,2] = 1
+    if (clusteri == 2)
+      ytest[i,2] = 0
+    if (clusteri == 4)
+      ytest[i,2] = 4
   }
 }
-traduire(res,3)
+traduire(ytest)
+write.csv(ytest,file = paste0(data_folder,"ytest2.csv"),row.names = FALSE)
 
 erreur = sum(res$trad != res$sleep_stage)/nrow(res)*100
-#À quel etat de sommeil correspond les clusters?
-
-# gamma = 32 - 100 Hz REM 4 --> 3
-# beta = 12 - 32 Hz Wake 0  --> 4,5
-# alpha = 8 - 12 Hz Wake 0  --> 4,5
-# theta = 4 - 8 Hz 1,2,3  --> 1,2
-# delta = 0 - 4 Hz 1,2,3 -->1,2
 
 comparer_stades = function(df)
 {
@@ -227,5 +245,5 @@ boxplots = function(df)
 }
 
 boxplots(ent_acc_oxy)
-comparer_stades(ent_acc_oxy)
+comparer_stades(f_eeg)
   
