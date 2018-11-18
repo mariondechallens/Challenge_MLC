@@ -12,7 +12,7 @@ l=list.datasets(xtrain)
 
 
 eeg1 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[4]]))
-x = eeg1[1,]
+x = eeg1[4,]
 plot(as.numeric(x),type="l",ylab="Amplitude en uV")
 
 #Pre processing des donnees
@@ -34,8 +34,45 @@ frequence2_eeg = function(x)
   return(freq)
 }
 
-frequence2_eeg(x)
-frequence2_eeg(xt)
+waves_eeg = function(x)
+{
+  pic = as.data.frame(fpeaks(seewave::spec(as.numeric(x),f = 50,plot = FALSE),plot = FALSE))
+  pic$freq = pic$freq*1000
+  n =  nrow(pic)
+  #alpha waves
+  f_alpha =  subset(pic,pic$freq >= 8 & pic$freq <= 13)
+  alpha = nrow(f_alpha)/n
+  
+  #theta waves
+  f_theta =  subset(pic,pic$freq >= 4 & pic$freq <= 8)
+  theta = nrow(f_theta)/n
+  
+  #delta waves
+  f_delta =  subset(pic,pic$freq >= 0.5 & pic$freq <= 4)
+  delta = nrow(f_delta)/n
+  
+  #beta waves
+  f_beta =  subset(pic,pic$freq >= 13 & pic$freq <= 30)
+  beta = nrow(f_beta)/n
+  
+  #K-complex
+  f_K =  subset(pic,pic$freq >= 0.5 & pic$freq <= 1.5)
+  K = nrow(f_K)/n
+  
+  #spindles
+  f_sp =  subset(pic,pic$freq >= 12 & pic$freq <= 14)
+  sp = nrow(f_sp)/n
+  
+  return(c(alpha,beta,delta,theta,K,sp))
+}
+
+
+waves_eeg(x)
+s = apply(eeg1,1,waves_eeg)
+sd = as.data.frame(t(s))
+colnames(sd) = c("alpha","beta","delta","theta","K","sp")
+sd = cbind(ytrain,sd)
+write.csv(sd,file = paste0(data_folder,"waves_eeg1.csv"),row.names = FALSE)
 
 frequence2_acc_oxy = function(x)
 {
@@ -45,8 +82,8 @@ frequence2_acc_oxy = function(x)
   return(freq)
 }
 
-df=yrandom
-j=3
+df=ytrain
+
 for (i in 4:10)
 {
   print(i)
@@ -70,7 +107,7 @@ f_eeg = read.csv(paste0(data_folder,"freq_eeg2.csv"))
 ent_eeg = read.csv(paste0(data_folder,"mmd_esis_eeg.csv"))
 entropie = read.csv(paste0(data_folder,"ent_abs.csv"))
 
-df = merge(f_eeg,entropie,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+df = merge(sd,entropie,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
 df$sleep_stage = as.factor(df$sleep_stage)
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
 print(f_RandomForest)

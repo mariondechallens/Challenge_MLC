@@ -1,5 +1,6 @@
 library(h5,warn.conflicts = FALSE)
 library(seewave)
+library(TSA)
 
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
@@ -9,8 +10,8 @@ xtest = h5file(name = paste0(data_folder,"test.h5/test.h5"))
 l=list.datasets(xtrain)
 l2 = list.datasets(xtest)
 
-accx = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[1]]))
-x = accx[17,]
+eeg2 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[5]]))
+x = eeg2[697,]
 plot(as.numeric(x),type="l",ylab="Amplitude en uV")
 ##idée : identifier les ondes beta, alpha etc avec leur amplitude et fréquence
 
@@ -58,7 +59,7 @@ spectre_freq = function(x, xlimits=c(0,100),p = FALSE) {
 
 frequence = function(x,pp=FALSE){
   FFT = fft(as.numeric(x))
-  sp = as.data.frame(spectre_freq(FFT,p=pp)[1:100,])
+  sp = as.data.frame(spectre_freq(FFT,p=pp))
   maxi = max(sp$V2)
   freq = subset(sp,sp$V2 == maxi)$V1
   return(freq)
@@ -67,13 +68,14 @@ frequence(x,TRUE)
 
 frequence2 = function(x)
 {
-  f = as.data.frame(seewave::spec(as.numeric(x),f = 10,plot = FALSE)) #pkg seewave
+  f = as.data.frame(seewave::spec(as.numeric(x),f = 50,plot = FALSE)) #pkg seewave
   maxi = max(f$y)
   freq = subset(f,f$y == maxi)$x*1000
   return(freq)
 }
 
 frequence2(x)
+
 
 Esis = function(x)  
 {
