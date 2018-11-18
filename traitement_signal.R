@@ -124,7 +124,7 @@ ent_acc_oxy_test = read.csv(paste0(data_folder,"mmd_esis_acc_oxy_test.csv"))
 df2 = yrandom
 j=3
 k=0
-for (i in c(1,2,3,11))
+for (i in 4:10)
 {
   print(i)
   data = as.data.frame(readDataSet(xtest[list.datasets(xtest, recursive = TRUE)[i]]))
@@ -134,13 +134,14 @@ for (i in c(1,2,3,11))
   k = k + 1
 }
 rm(data)
-features = c("accx_mmd","accx_esis","accy_mmd","accy_esis","accz_mmd","accz_esis",
-             "oxy_mmd","oxy_esis")
-# features = c("eeg1_mmd","eeg1_esis","eeg2_mmd","eeg2_esis","eeg3_mmd","eeg3_esis",
-#              "eeg4_mmd","eeg4_esis","eeg5_mmd","eeg5_esis","eeg6_mmd","eeg6_esis",
-#             "eeg7_mmd","eeg7_esis")
+# features = c("accx_mmd","accx_esis","accy_mmd","accy_esis","accz_mmd","accz_esis",
+#              "oxy_mmd","oxy_esis")
+features = c("eeg1_mmd","eeg1_esis","eeg2_mmd","eeg2_esis","eeg3_mmd","eeg3_esis",
+             "eeg4_mmd","eeg4_esis","eeg5_mmd","eeg5_esis","eeg6_mmd","eeg6_esis",
+            "eeg7_mmd","eeg7_esis")
 colnames(df2)[3:ncol(df2)] = features
-write.csv(df2,file = paste0(data_folder,"mmd_esis_acc_oxy_test.csv"),row.names = FALSE)
+df2 = df2[,-2]
+write.csv(df2,file = paste0(data_folder,"mmd_esis_eeg_test.csv"),row.names = FALSE)
 
 
 Kmeans = function(data,k)
