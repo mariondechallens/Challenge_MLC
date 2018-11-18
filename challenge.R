@@ -71,6 +71,7 @@ for (i in 1:length(l))
 }
 rm(data)
 
+dftest = yrandom
 j = 2
 for (i in 1:length(l2))
 {
@@ -88,7 +89,8 @@ features = c("accx_ent2","accx_absstd","accy_ent2","accy_absstd","accz_ent2","ac
              "eeg7_ent2","eeg7_absstd","oxy_ent2","oxy_absstd")
 colnames(df)[3:ncol(df)] = features
 colnames(dftest)[3:ncol(dftest)] = features
-dftest = dftest[3:ncol(dftest)]
+dftest = dftest[,-2]
+write.csv(dftest,file = paste0(data_folder,"ent_abs_test.csv"),row.names = FALSE)
 
 # accx = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[1]]))
 # accy = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[2]]))

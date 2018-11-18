@@ -88,7 +88,7 @@ Esis = function(x)
     
     res = res + (My-my)^2
   }
-  v = lambda*frequence(x)
+  v = lambda*frequence2(x)
   return(res*v)
   
 }

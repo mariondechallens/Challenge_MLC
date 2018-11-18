@@ -64,26 +64,32 @@ df = df[,-2]
 write.csv(df,file = paste0(data_folder,"freq_eeg2_test.csv"),row.names = FALSE)
 
 
+
 ####random forest training
 f_eeg = read.csv(paste0(data_folder,"freq_eeg2.csv"))
 ent_eeg = read.csv(paste0(data_folder,"mmd_esis_eeg.csv"))
+entropie = read.csv(paste0(data_folder,"ent_abs.csv"))
 
-df = merge(f_eeg,ent_eeg,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+df = merge(f_eeg,entropie,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
 df$sleep_stage = as.factor(df$sleep_stage)
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
 print(f_RandomForest)
 
 #Variables d'importance 
-f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
-                                   decreasing = TRUE), ]
+imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
+                                   decreasing = TRUE), ])
+
+f2_RandomForest = randomForest(sleep_stage~.,data=df[,c("sleep_stage",rownames(imp)[1:11])])
+print(f2_RandomForest)
 
 ####random forest testing
 f_eeg_t = read.csv(paste0(data_folder,"freq_eeg2_test.csv"))
 ent_eeg_t = read.csv(paste0(data_folder,"mmd_esis_eeg_test.csv"))
-df_t = merge(f_eeg_t,ent_eeg_t,by="id",all.x = TRUE,all.y = TRUE)
+entropie_t = read.csv(paste0(data_folder,"ent_abs_test.csv"))
+df_t = merge(f_eeg_t,entropie_t,by="id",all.x = TRUE,all.y = TRUE)
 
-pred = as.data.frame(predict(f_RandomForest,df_t[,-1]))
+pred = as.data.frame(predict(f2_RandomForest,df_t[,-1]))
 colnames(pred) = "sleep_stage"
 pred$id = yrandom[,1]
 pred = pred[,c("id","sleep_stage")]
-write.csv(pred,file = paste0(data_folder,"ytest3.csv"),row.names = FALSE)
+write.csv(pred,file = paste0(data_folder,"ytest4.csv"),row.names = FALSE)
