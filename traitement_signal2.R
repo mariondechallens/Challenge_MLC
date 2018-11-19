@@ -4,6 +4,7 @@ library(seewave)
 library(randomForest)
 library(FactoMineR)
 library(kernlab)
+library(dd)
  
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
@@ -141,8 +142,49 @@ ana = catdes(ent_CAH,num.var = 1)
 clus = HCPC(ent_CAH[1:10000,-1],nb.clust = 5)
 
 ####SVM
-res.ksvm = ksvm(sleep_stage~., data=entropie[,-1], kernel="rbfdot", type = "C-svc",
+res.ksvm = ksvm(sleep_stage~., data=entropie[1:1000,-1], kernel="rbfdot", type = "C-svc",
                 kpar=list(sigma=5),C=5,cross=7)
 
+#l'évolution du taux d'erreur par validation croisée en fonction de  et .
+logseq = function(a,b,n=8) exp(seq(log(a), log(b), length.out=n))
+C = logseq(0.01, 100, 20)
+sigma = logseq(0.01, 100, 20)
+nb_sv = err = matrix(0, length(C), length(sigma))
+colnames(nb_sv) = round(sigma, 2)
+rownames(nb_sv) = round(C, 2)
+colnames(err) = round(sigma, 2)
+rownames(err) = round(C, 2)
+for (i in 1:length(C)){
+  for(j in 1:length(sigma)){
+    res.ksvm = ksvm(sleep_stage~., data=entropie[1:1000,-1], kernel="rbfdot", type = "C-svc",
+                    kpar=list(sigma=sigma[j]), C=C[i], cross = 7)
+    err[i, j] = res.ksvm@cross
+    nb_sv[i, j] = res.ksvm@nSV
+  }
+}
 
+#Heatmap du taux d'erreur en fonction de  et C :
+pheatmap(err, cluster_rows = FALSE, cluster_cols = FALSE)
+#Heatmap du nombre de Support Vectors en fonction de  et C :
+pheatmap(nb_sv, cluster_rows = FALSE, cluster_cols = FALSE)
 
+#Construire le modèle SVM associé au couple (, ) et tester le modèle sur l'échantillon de
+#test.
+C_star = C[which(err == min(err), arr.ind = TRUE)[1]]
+sigma_star = sigma[which(err == min(err), arr.ind = TRUE)[2]]
+res.ksvm = ksvm(sleep_stage~., data=entropie[1:1000,-1], kernel="rbfdot", type = "C-svc",
+                kpar=list(sigma=sigma_star), C = C_star, cross = 10)
+
+yhat = predict(res.ksvm, entropie[1001:nrow(entropie), 3:ncol(entropie)])
+
+#matrice de confusion
+M = table(y = entropie[1001:nrow(entropie),2], yhat)
+M
+
+#soit entre terme de taux d'erreur :
+1-sum(diag(M))/sum(M)
+
+ytest =  predict(res.ksvm, entropie_t)
+ytest = as.data.frame(cbind(yrandom$id,ytest))
+colnames(ytest) = c("id","sleep_stage")
+write.csv(ytest,file = paste0(data_folder,"ytest5.csv"),row.names = FALSE)
