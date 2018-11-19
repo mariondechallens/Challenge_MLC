@@ -2,6 +2,8 @@ library(h5,warn.conflicts = FALSE)
 library(caret)
 library(seewave)
 library(randomForest)
+library(FactoMineR)
+library(kernlab)
  
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
@@ -130,3 +132,17 @@ colnames(pred) = "sleep_stage"
 pred$id = yrandom[,1]
 pred = pred[,c("id","sleep_stage")]
 write.csv(pred,file = paste0(data_folder,"ytest4.csv"),row.names = FALSE)
+
+####Classification ascendante hierarchique (FactoMineR)
+ent_CAH = entropie[,-1]
+ent_CAH$sleep_stage = as.factor(ent_CAH$sleep_stage)
+ana = catdes(ent_CAH,num.var = 1)
+
+clus = HCPC(ent_CAH[1:10000,-1],nb.clust = 5)
+
+####SVM
+res.ksvm = ksvm(sleep_stage~., data=entropie[,-1], kernel="rbfdot", type = "C-svc",
+                kpar=list(sigma=5),C=5,cross=7)
+
+
+
