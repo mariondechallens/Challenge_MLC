@@ -65,9 +65,9 @@ for (i in 1:length(l))
 {
   print(i)
   data = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[i]]))
-  df[,i+j] = apply(data, 1,entropie2)
-  df[,i+j+1] = apply(data, 1,abs_deviation)
-  j = j + 1
+  df[,i+j] = apply(data, 1,entropie1)
+  # df[,i+j+1] = apply(data, 1,abs_deviation)
+  #j = j + 1
 }
 rm(data)
 
@@ -77,55 +77,25 @@ for (i in 1:length(l2))
 {
   print(i)
   data = as.data.frame(readDataSet(xtest[list.datasets(xtest, recursive = TRUE)[i]]))
-  dftest[,i+j] = apply(data,1,entropie2)
-  dftest[,i+j+1] = apply(data, 1, abs_deviation)
-  j = j + 1
+  dftest[,i+j] = apply(data,1,entropie1)
+  # dftest[,i+j+1] = apply(data, 1, abs_deviation)
+  # j = j + 1
 }
 rm(data)
 
-features = c("accx_ent2","accx_absstd","accy_ent2","accy_absstd","accz_ent2","accz_absstd",
-             "eeg1_ent2","eeg1_absstd","eeg2_ent2","eeg2_absstd","eeg3_ent2","eeg3_absstd",
-             "eeg4_ent2","eeg4_absstd","eeg5_ent2","eeg5_absstd","eeg6_ent2","eeg6_absstd",
-             "eeg7_ent2","eeg7_absstd","oxy_ent2","oxy_absstd")
+# features = c("accx_ent2","accx_absstd","accy_ent2","accy_absstd","accz_ent2","accz_absstd",
+#              "eeg1_ent2","eeg1_absstd","eeg2_ent2","eeg2_absstd","eeg3_ent2","eeg3_absstd",
+#              "eeg4_ent2","eeg4_absstd","eeg5_ent2","eeg5_absstd","eeg6_ent2","eeg6_absstd",
+#              "eeg7_ent2","eeg7_absstd","oxy_ent2","oxy_absstd")
+features = c("accx_ent1","accy_ent1","accz_ent1","eeg1_ent1","eeg2_ent1","eeg3_ent1",
+             "eeg4_ent1","eeg5_ent2","eeg6_ent2","eeg7_ent1","oxy_ent1")
+      
 colnames(df)[3:ncol(df)] = features
 colnames(dftest)[3:ncol(dftest)] = features
 dftest = dftest[,-2]
-write.csv(dftest,file = paste0(data_folder,"ent_abs_test.csv"),row.names = FALSE)
+write.csv(dftest,file = paste0(data_folder,"ent1_test.csv"),row.names = FALSE)
+write.csv(df,file = paste0(data_folder,"ent1.csv"),row.names = FALSE)
 
-# accx = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[1]]))
-# accy = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[2]]))
-# accz = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[3]]))
-# eeg1 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[4]]))
-# eeg2 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[5]]))
-# eeg3 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[6]]))
-# eeg4 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[7]]))
-# eeg5 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[8]]))
-# eeg6 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[9]]))
-# eeg7 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[10]]))
-# oxy = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[11]]))
-
-#write.csv(df,file = paste0(data_folder,"df2.csv"),row.names = FALSE)
-#df = read.csv(paste0(data_folder,"df2.csv"))
-#write.csv(dftest,file = paste0(data_folder,"df1test.csv"),row.names = FALSE)
-
-boxplot (eeg1_std ~ sleep_stage, data = df) 
-
-
-lm1 = glm(df$sleep_stage~.,data = df[-1],family = poisson())
-summary(lm1) #faire des moyennes par enregistrement?
-anova(lm1,test="Chisq")
-
-lm2 = glm(df$sleep_stage~ accx_absstd + eeg2_absstd + accz_absstd  + accz_ent2  + eeg2_ent2 + eeg3_ent2  ,data = df[-1],family = poisson())
-summary(lm2)
-
-lm3 = glm(df$sleep_stage~ accx_absstd + accz_absstd  + accz_ent2 ,data = df[-1],family = poisson())
-summary(lm3)
-
-p = predict (lm3, newdata = dftest, type = "response") 
-yhat = round(p)
-res = as.data.frame(cbind(yrandom$id,yhat))
-colnames(res)=c("id","sleep_stage")
-write.csv(res,file = paste0(data_folder,"res1.csv"),row.names = FALSE)
 
 ##cross validation
 #Randomly shuffle the data

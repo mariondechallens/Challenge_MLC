@@ -4,7 +4,6 @@ library(seewave)
 library(randomForest)
 library(FactoMineR)
 library(kernlab)
-library(dd)
  
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
@@ -108,21 +107,55 @@ write.csv(df,file = paste0(data_folder,"freq_eeg2_test.csv"),row.names = FALSE)
 ####random forest training
 f_eeg = read.csv(paste0(data_folder,"freq_eeg2.csv"))
 ent_eeg = read.csv(paste0(data_folder,"mmd_esis_eeg.csv"))
-entropie = read.csv(paste0(data_folder,"ent_abs.csv"))
+entropie = read.csv(paste0(data_folder,"ent_abs.csv"))[,c(1,2,3,5,7,9,11,13,15,17,19,21,23)]
+mmd = ent_eeg[,c(1,2,3,5,7,9,11,13,15)]
+prop_eeg1 = read.csv(paste0(data_folder,"waves_eeg1.csv"))
 
-df = merge(sd,entropie,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+df = merge(mmd,prop_eeg1,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+df = merge(df,entropie,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
 df$sleep_stage = as.factor(df$sleep_stage)
-f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
+df_train = df[1:25526,] #2/3
+df_test = df[25526:nrow(df),]
+f_RandomForest = randomForest(sleep_stage~.,data=df_train[,2:ncol(df)])
 print(f_RandomForest)
 
 #Variables d'importance 
 imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
                                    decreasing = TRUE), ])
 
-f2_RandomForest = randomForest(sleep_stage~.,data=df[,c("sleep_stage",rownames(imp)[1:11])])
+f2_RandomForest = randomForest(sleep_stage~.,data=df_train[,c("sleep_stage",rownames(imp)[1:10])])
 print(f2_RandomForest)
+yhat = as.data.frame(predict(f2_RandomForest,df_test[,3:ncol(df_test)]))
+erreur_mat(df_test[,2],yhat[,1])
 
 ####random forest testing
+
+erreur_mat = function(ytrue,yhat){
+  #matrice de confusion
+  M = table(y =ytrue, yhat)
+  #print(M)
+  
+  #soit entre terme de taux d'erreur :
+  return(1-sum(diag(M))/sum(M))
+}
+
+m_a_tester <- c(1,5,10,20,50,100,200) 
+
+#apprentissage-test 
+train_test_rf <- function(m){   
+  rf <- randomForest(sleep_stage ~ .,data=df_train[,-1],ntree=m)   
+  predrf <- as.data.frame(predict(rf,newdata = df_test[,3:ncol(df_test)]))   
+  return(erreur_mat(df_test[,2],predrf[,1])) 
+  } 
+
+#évaluation 20 fois de chaque valeur de m 
+result <- replicate(20,sapply(m_a_tester,train_test_rf)) 
+
+#graphique 
+plot(m_a_tester,apply(result,1,mean),xlab="m",ylab="Err. rate",type="b")
+
+
+
 f_eeg_t = read.csv(paste0(data_folder,"freq_eeg2_test.csv"))
 ent_eeg_t = read.csv(paste0(data_folder,"mmd_esis_eeg_test.csv"))
 entropie_t = read.csv(paste0(data_folder,"ent_abs_test.csv"))
@@ -145,7 +178,7 @@ clus = HCPC(ent_CAH[1:10000,-1],nb.clust = 5)
 res.ksvm = ksvm(sleep_stage~., data=entropie[1:1000,-1], kernel="rbfdot", type = "C-svc",
                 kpar=list(sigma=5),C=5,cross=7)
 
-#l'évolution du taux d'erreur par validation croisée en fonction de  et .
+#l'évolution du taux d'erreur par validation croisée en fonction de  et .
 logseq = function(a,b,n=8) exp(seq(log(a), log(b), length.out=n))
 C = logseq(0.01, 100, 20)
 sigma = logseq(0.01, 100, 20)
@@ -163,12 +196,12 @@ for (i in 1:length(C)){
   }
 }
 
-#Heatmap du taux d'erreur en fonction de  et C :
+#Heatmap du taux d'erreur en fonction de  et C :
 pheatmap(err, cluster_rows = FALSE, cluster_cols = FALSE)
-#Heatmap du nombre de Support Vectors en fonction de  et C :
+#Heatmap du nombre de Support Vectors en fonction de  et C :
 pheatmap(nb_sv, cluster_rows = FALSE, cluster_cols = FALSE)
 
-#Construire le modèle SVM associé au couple (, ) et tester le modèle sur l'échantillon de
+#Construire le modèle SVM associé au couple (, ) et tester le modèle sur l'échantillon de
 #test.
 C_star = C[which(err == min(err), arr.ind = TRUE)[1]]
 sigma_star = sigma[which(err == min(err), arr.ind = TRUE)[2]]
@@ -177,14 +210,18 @@ res.ksvm = ksvm(sleep_stage~., data=entropie[1:1000,-1], kernel="rbfdot", type =
 
 yhat = predict(res.ksvm, entropie[1001:nrow(entropie), 3:ncol(entropie)])
 
-#matrice de confusion
-M = table(y = entropie[1001:nrow(entropie),2], yhat)
-M
-
-#soit entre terme de taux d'erreur :
-1-sum(diag(M))/sum(M)
-
 ytest =  predict(res.ksvm, entropie_t)
 ytest = as.data.frame(cbind(yrandom$id,ytest))
 colnames(ytest) = c("id","sleep_stage")
 write.csv(ytest,file = paste0(data_folder,"ytest5.csv"),row.names = FALSE)
+
+
+#############Boosting
+#boosting 
+bo_1 <- boosting(sleep_stage ~ ., data = df_train[,-1],mfinal=20, boos=FALSE) 
+
+#prédiction 
+predbo_1 <- predict(bo_1,newdata = df_test[,3:ncol(df_test)]) 
+
+#taux d'erreur 
+print(error_rate(image_test$REGION_TYPE,predbo_1$class)) 
