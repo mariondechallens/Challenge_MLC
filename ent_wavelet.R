@@ -2,6 +2,7 @@ library(h5,warn.conflicts = FALSE)
 library(wmtsa)
 library(seewave)
 library(randomForest)
+library(stats)
 
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
@@ -9,16 +10,14 @@ yrandom = read.csv(paste0(data_folder,"sample_submission.csv"))
 xtrain = h5file(name = paste0(data_folder,"train.h5/train.h5"))
 xtest = h5file(name = paste0(data_folder,"test.h5/test.h5"))
 
-eeg1 = as.data.frame(readDataSet(xtest[list.datasets(xtest, recursive = TRUE)[4]]))
-x = eeg1[38,]
+eeg1 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[4]]))
+x = eeg1[1,]
 plot(as.numeric(x),type="l",ylab="Amplitude en uV")
 
 #decomposition continue en vaguelettes: filtrer les données
-d = wavCWT(as.numeric(x))
-d_m = as.data.frame(as.matrix(d))
-plot(d)
-plot(d,series = TRUE)
-plot(d,type = "persp")
+d = wavDWT(as.numeric(x),n.levels = 6)
+d_m = reconstruct(d)
+spectrum(d_m)
 
 entropie1 = function(x){
   x = as.numeric(x)
