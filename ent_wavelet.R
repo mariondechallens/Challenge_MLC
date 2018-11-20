@@ -9,7 +9,7 @@ yrandom = read.csv(paste0(data_folder,"sample_submission.csv"))
 xtrain = h5file(name = paste0(data_folder,"train.h5/train.h5"))
 xtest = h5file(name = paste0(data_folder,"test.h5/test.h5"))
 
-eeg1 = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[4]]))
+eeg1 = as.data.frame(readDataSet(xtest[list.datasets(xtest, recursive = TRUE)[4]]))
 x = eeg1[38,]
 plot(as.numeric(x),type="l",ylab="Amplitude en uV")
 
@@ -74,10 +74,11 @@ wavelet = function(x)
 
 wavelet(x)
 s = apply(eeg1,1,wavelet)
-df = 
-colnames(df)[3:ncol(df)] = c("alpha1_ent1","beta1_ent1","delta1_ent1","theta1_ent1","K1_ent1","sp1_ent1")
-           
-write.csv(sd,file = paste0(data_folder,"wavelets_eeg1.csv"),row.names = FALSE)
+df = as.data.frame(t(s))
+colnames(df) = c("alpha1_ent1","beta1_ent1","delta1_ent1","theta1_ent1","K1_ent1","sp1_ent1")
+df =cbind(yrandom,df)
+        
+write.csv(df,file = paste0(data_folder,"wavelets_eeg1_test.csv"),row.names = FALSE)
 
 #####RandomForest
 
@@ -90,6 +91,8 @@ erreur_mat = function(ytrue,yhat){
   return(1-sum(diag(M))/sum(M))
 }
 
+entropie = read.csv(paste0(data_folder,"ent_abs.csv"))[,c(1,2,3,5,7,23)]
+
 df$sleep_stage = as.factor(df$sleep_stage)
 df_train = df[1:25526,] #2/3
 df_test = df[25526:nrow(df),]
@@ -100,9 +103,8 @@ print(f_RandomForest)
 imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
                                                     decreasing = TRUE), ])
 
-f2_RandomForest = randomForest(sleep_stage~.,data=df_train[,c("sleep_stage",rownames(imp)[1:10])])
-print(f2_RandomForest)
-yhat = as.data.frame(predict(f2_RandomForest,df_test[,3:ncol(df_test)]))
+
+yhat = as.data.frame(predict(f_RandomForest,df_test[,3:ncol(df_test)]))
 erreur_mat(df_test[,2],yhat[,1])
 
 
