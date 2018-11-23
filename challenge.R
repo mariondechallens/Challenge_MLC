@@ -110,12 +110,13 @@ erreur_mat = function(ytrue,yhat){
 
 
 df = read.csv(paste0(data_folder,"basic_feat.csv"))
-df2 =  read.csv(paste0(data_folder,"ent_abs.csv"))
+df2 =  read.csv(paste0(data_folder,"mmd_esis_eeg.csv"))
 df3 = merge(df,df2,by= c("id","sleep_stage"),all.x = TRUE,all.y =  TRUE)
-df3$sleep_stage = as.factor(df3$sleep_stage)
-f_RandomForest = randomForest(sleep_stage~.,data=df3[,2:ncol(df3)])
+df4 = read.csv(paste0(data_folder,"mmd_esis_acc_oxy.csv"))
+df5 = merge(df3,df4,by= c("id","sleep_stage"),all.x = TRUE,all.y =  TRUE)
+df5$sleep_stage = as.factor(df5$sleep_stage)
+f_RandomForest = randomForest(sleep_stage~.,data=df5[,2:ncol(df5)])
 print(f_RandomForest)
-plot(f_RandomForest)
 
 #Variables d'importance 
 imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
@@ -132,4 +133,14 @@ y_test = cbind(yrandom[,1],y_test)
 colnames(y_test) = c("id","sleep_stage")
 write.csv(y_test,file = paste0(data_folder,"basic_feat_ent_y_test.csv"),row.names = FALSE)
 
-h5close(xtrain)
+
+# Adaboost 
+library(adabag)
+
+adaboost <- boosting(sleep_stage~., data=df5[,2:ncol(df5)], boos=TRUE)
+
+
+# Training error
+prev_app = predict(fit, newdata = df3, n.trees = 1:B)
+err_app = apply(prev_app, 2, function(x) sum(as.numeric(x>0) != y)/NROW(df5))
+
