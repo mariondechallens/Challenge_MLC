@@ -124,6 +124,8 @@ yhat = as.data.frame(predict(f_RandomForest,df_test[,3:ncol(df_test)]))
 erreur_mat(df_test[,2],yhat[,1])
 
 y_test = as.data.frame(predict(f_RandomForest,dftest))
-
+y_test = cbind(yrandom[,1],y_test)
+colnames(y_test) = c("id","sleep_stage")
+write.csv(y_test,file = paste0(data_folder,"basic_feat_y_test.csv"),row.names = FALSE)
 
 h5close(xtrain)
