@@ -107,25 +107,29 @@ erreur_mat = function(ytrue,yhat){
   #soit entre terme de taux d'erreur :
   return(1-sum(diag(M))/sum(M))
 }
-df$sleep_stage = as.factor(df$sleep_stage)
-df_train = df[1:25526,] #2/3
-df_test = df[25526:nrow(df),]
-f_RandomForest = randomForest(sleep_stage~.,data=df_train[,2:ncol(df)])
+
+
+df = read.csv(paste0(data_folder,"basic_feat.csv"))
+df2 =  read.csv(paste0(data_folder,"ent_abs.csv"))
+df3 = merge(df,df2,by= c("id","sleep_stage"),all.x = TRUE,all.y =  TRUE)
+df3$sleep_stage = as.factor(df3$sleep_stage)
+f_RandomForest = randomForest(sleep_stage~.,data=df3[,2:ncol(df3)])
 print(f_RandomForest)
+plot(f_RandomForest)
 
 #Variables d'importance 
 imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
                                                     decreasing = TRUE), ])
 
-f_RandomForest2 = randomForest(sleep_stage~.,data=df_train[,c("sleep_stage",rownames(imp)[1:6])])
+f_RandomForest2 = randomForest(sleep_stage~.,data=df_train[,c("sleep_stage",rownames(imp))])
 print(f_RandomForest2)
 
-yhat = as.data.frame(predict(f_RandomForest,df_test[,3:ncol(df_test)]))
-erreur_mat(df_test[,2],yhat[,1])
-
+df_test = read.csv(paste0(data_folder,"basic_feat_test.csv"))
+df_test2 = read.csv(paste0(data_folder,"ent_abs_test.csv"))[,-1]
+dftest = cbind(df_test,df_test2)
 y_test = as.data.frame(predict(f_RandomForest,dftest))
 y_test = cbind(yrandom[,1],y_test)
 colnames(y_test) = c("id","sleep_stage")
-write.csv(y_test,file = paste0(data_folder,"basic_feat_y_test.csv"),row.names = FALSE)
+write.csv(y_test,file = paste0(data_folder,"basic_feat_ent_y_test.csv"),row.names = FALSE)
 
 h5close(xtrain)

@@ -114,19 +114,16 @@ prop_eeg1 = read.csv(paste0(data_folder,"waves_eeg1.csv"))
 df = merge(mmd,prop_eeg1,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
 df = merge(df,entropie,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
 df$sleep_stage = as.factor(df$sleep_stage)
-df_train = df[1:25526,] #2/3
-df_test = df[25526:nrow(df),]
-f_RandomForest = randomForest(sleep_stage~.,data=df_train[,2:ncol(df)])
+f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
 print(f_RandomForest)
 
 #Variables d'importance 
 imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
                                    decreasing = TRUE), ])
 
-f2_RandomForest = randomForest(sleep_stage~.,data=df_train[,c("sleep_stage",rownames(imp)[1:10])])
+f2_RandomForest = randomForest(sleep_stage~.,data=df[,c("sleep_stage",rownames(imp)[1:10])])
 print(f2_RandomForest)
-yhat = as.data.frame(predict(f2_RandomForest,df_test[,3:ncol(df_test)]))
-erreur_mat(df_test[,2],yhat[,1])
+
 
 ####random forest testing
 

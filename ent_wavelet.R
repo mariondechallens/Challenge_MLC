@@ -93,9 +93,7 @@ erreur_mat = function(ytrue,yhat){
 entropie = read.csv(paste0(data_folder,"ent_abs.csv"))[,c(1,2,3,5,7,23)]
 
 df$sleep_stage = as.factor(df$sleep_stage)
-df_train = df[1:25526,] #2/3
-df_test = df[25526:nrow(df),]
-f_RandomForest = randomForest(sleep_stage~.,data=df_train[,2:ncol(df)])
+f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
 print(f_RandomForest)
 
 #Variables d'importance 
@@ -103,8 +101,6 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
                                                     decreasing = TRUE), ])
 
 
-yhat = as.data.frame(predict(f_RandomForest,df_test[,3:ncol(df_test)]))
-erreur_mat(df_test[,2],yhat[,1])
 
 
 
