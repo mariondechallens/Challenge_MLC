@@ -3,6 +3,7 @@ library(wmtsa)
 library(seewave)
 library(randomForest)
 library(stats)
+library(wavelets)
 
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
@@ -15,9 +16,8 @@ x = eeg1[1,]
 plot(as.numeric(x),type="l",ylab="Amplitude en uV")
 
 #decomposition continue en vaguelettes: filtrer les données
-d = wavDWT(as.numeric(x),n.levels = 6)
-d_m = reconstruct(d)
-spectrum(d_m)
+d = dwt(as.numeric(x),n.levels = 6)
+
 
 entropie1 = function(x){
   x = as.numeric(x)
@@ -67,6 +67,33 @@ wavelet = function(x)
   #spindles
   f_sp =  subset(pic,pic$freq >= 12 & pic$freq <= 14)
   sp = nonvide(entropie1(f_sp[,1]))
+  
+  return(c(alpha,beta,delta,theta,K,sp))
+}
+
+
+
+wavelet_coeff = function(x)
+{
+  d = dwt(as.numeric(x),n.levels = 6)
+ 
+  wave1_ent = nonvide(entropie1(d@W$W1))
+  wave1_sd = nonvide(sd(d@W$W1))
+  
+  wave2_ent = nonvide(entropie1(d@W$W2))
+  wave2_sd = nonvide(sd(d@W$W2))
+  
+  wave3_ent = nonvide(entropie1(d@W$W3))
+  wave3_sd = nonvide(sd(d@W$W3))
+  
+  wave4_ent = nonvide(entropie1(d@W$W4))
+  wave4_sd = nonvide(sd(d@W$W4))
+  
+  wave5_ent = nonvide(entropie1(d@W$W5))
+  wave5_sd = nonvide(sd(d@W$W5))
+  
+  wave6_ent = nonvide(entropie1(d@W$W6))
+  wave6_sd = nonvide(sd(d@W$W6))
   
   return(c(alpha,beta,delta,theta,K,sp))
 }
