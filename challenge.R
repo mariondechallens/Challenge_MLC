@@ -110,9 +110,9 @@ erreur_mat = function(ytrue,yhat){
 
 
 df = read.csv(paste0(data_folder,"basic_feat.csv"))
-df2 =  read.csv(paste0(data_folder,"mmd_esis_eeg.csv"))
+df2 =  read.csv(paste0(data_folder,"wavelets_coeff_eeg1.csv"))
 df3 = merge(df,df2,by= c("id","sleep_stage"),all.x = TRUE,all.y =  TRUE)
-df4 = read.csv(paste0(data_folder,"mmd_esis_acc_oxy.csv"))
+df5=df4 = read.csv(paste0(data_folder,"mmd_esis_acc_oxy.csv"))
 df5 = merge(df3,df4,by= c("id","sleep_stage"),all.x = TRUE,all.y =  TRUE)
 df5$sleep_stage = as.factor(df5$sleep_stage)
 f_RandomForest = randomForest(sleep_stage~.,data=df5[,2:ncol(df5)])

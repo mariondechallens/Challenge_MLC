@@ -4,6 +4,7 @@ library(seewave)
 library(randomForest)
 library(stats)
 library(wavelets)
+library(signal)
 
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
@@ -16,7 +17,13 @@ x = eeg1[1,]
 plot(as.numeric(x),type="l",ylab="Amplitude en uV")
 
 #decomposition continue en vaguelettes: filtrer les données
-d = dwt(as.numeric(x),n.levels = 6)
+
+# fn = 50/2 #freq de nyquist
+# bf = butter(5,W=c(0.5,35), type = "cut",plane = "s")
+# xb = filter(bf,as.numeric(x))
+# xb = bwfilter(wave = as.numeric(x),f = 50,n=5,from = 0.5/fn, to = 35/fn, bandpass = FALSE)
+# plot(xb)
+# d = dwt(as.numeric(xb),n.levels = 6)
 
 
 entropie1 = function(x){
@@ -100,16 +107,25 @@ wavelet_coeff = function(x)
 }
 
 wavelet_coeff(x)
-s = apply(eeg1,1,wavelet_coeff)
-df = as.data.frame(t(s))
-colnames(df) = c("wave1_ent_eeg1","wave1_sd_eeg1","wave2_ent_eeg1","wave2_sd_eeg1","wave3_ent_eeg1",
-                 "wave3_sd_eeg1","wave4_ent_eeg1","wave4_sd_eeg1","wave5_ent_eeg1","wave5_sd_eeg1","wave6_ent_eeg1","wave6_sd_eeg1")
-df =cbind(ytrain,df)
-        
-write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg1.csv"),row.names = FALSE)
 
+for (i in 4:10)
+{
+  print(i)
+  data = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[i]]))
+  #data = as.data.frame(readDataSet(xtest[list.datasets(xtest, recursive = TRUE)[i]]))
+  s = apply(data,1,wavelet_coeff)
+  df = as.data.frame(t(s))
+  colnames(df) = c(paste0("wave1_ent_eeg",i-3),paste0("wave1_sd_eeg",i-3),paste0("wave2_ent_eeg",i-3),paste0("wave2_sd_eeg",i-3),paste0("wave3_ent_eeg",i-3),
+                   paste0("wave3_sd_eeg",i-3),paste0("wave4_ent_eeg",i-3),paste0("wave4_sd_eeg",i-3),paste0("wave5_ent_eeg",i-3),paste0("wave5_sd_eeg",i-3),
+                   paste0("wave6_ent_eeg",i-3),paste0("wave6_sd_eeg",i-3))
+  df =cbind(ytrain,df)
+  
+  write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg",i-3,".csv"),row.names = FALSE)
+  #write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg",i-3,"_test.csv"),row.names = FALSE)
+  
+}
+rm(data)
 
-#####rajouter un filtre => pakg signal
 #####RandomForest
 
 erreur_mat = function(ytrue,yhat){
@@ -121,13 +137,19 @@ erreur_mat = function(ytrue,yhat){
   return(1-sum(diag(M))/sum(M))
 }
 
-entropie = read.csv(paste0(data_folder,"ent_abs.csv"))[,c(1,2,3,5,7,23)]
+df = read.csv(paste0(data_folder,"wavelets_coeff_eeg1.csv"))
+for (i in 2:7)
+{
+  data = read.csv(paste0(data_folder,"wavelets_coeff_eeg",i,".csv"))
+  df = merge(df,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+}
+rm(data)
 
 df$sleep_stage = as.factor(df$sleep_stage)
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
 print(f_RandomForest)
 
-n#Variables d'importance 
+#Variables d'importance 
 imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
                                                     decreasing = TRUE), ])
 
