@@ -111,17 +111,17 @@ wavelet_coeff(x)
 for (i in 4:10)
 {
   print(i)
-  data = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[i]]))
-  #data = as.data.frame(readDataSet(xtest[list.datasets(xtest, recursive = TRUE)[i]]))
+  #data = as.data.frame(readDataSet(xtrain[list.datasets(xtrain, recursive = TRUE)[i]]))
+  data = as.data.frame(readDataSet(xtest[list.datasets(xtest, recursive = TRUE)[i]]))
   s = apply(data,1,wavelet_coeff)
   df = as.data.frame(t(s))
   colnames(df) = c(paste0("wave1_ent_eeg",i-3),paste0("wave1_sd_eeg",i-3),paste0("wave2_ent_eeg",i-3),paste0("wave2_sd_eeg",i-3),paste0("wave3_ent_eeg",i-3),
                    paste0("wave3_sd_eeg",i-3),paste0("wave4_ent_eeg",i-3),paste0("wave4_sd_eeg",i-3),paste0("wave5_ent_eeg",i-3),paste0("wave5_sd_eeg",i-3),
                    paste0("wave6_ent_eeg",i-3),paste0("wave6_sd_eeg",i-3))
-  df =cbind(ytrain,df)
+  #df =cbind(ytrain,df)
   
-  write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg",i-3,".csv"),row.names = FALSE)
-  #write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg",i-3,"_test.csv"),row.names = FALSE)
+  #write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg",i-3,".csv"),row.names = FALSE)
+  write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg",i-3,"_test.csv"),row.names = FALSE)
   
 }
 rm(data)
@@ -154,7 +154,29 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
                                                     decreasing = TRUE), ])
 
 
+f_RandomForest2 = randomForest(sleep_stage~.,data=df[,c("sleep_stage",rownames(imp)[1:20])])
+print(f_RandomForest2)
 
+ent = read.csv(paste0(data_folder,"ent1.csv"))[,c(3,4,5,13)]
+df2 = cbind(df[,c("sleep_stage",rownames(imp)[1:30])],ent)
+f_RandomForest3 = randomForest(sleep_stage~.,data=df2)
+print(f_RandomForest3)
 
+####predict
+dft = read.csv(paste0(data_folder,"wavelets_coeff_eeg1_test.csv"))
+for (i in 2:7)
+{
+  data = read.csv(paste0(data_folder,"wavelets_coeff_eeg",i,"_test.csv"))
+  dft = merge(dft,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+}
+rm(data)
+
+### adaboost
+library(adabag)
+boo = boosting(sleep_stage~.,data=df[,c("sleep_stage",rownames(imp)[1:30])]) 
+
+### forward/backward elimination
+library(klaR)
+stepclass(sleep_stage~., data = df[,2:ncol(df)])
 
 
