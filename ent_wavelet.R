@@ -95,17 +95,21 @@ wavelet_coeff = function(x)
   wave6_ent = nonvide(entropie1(d@W$W6))
   wave6_sd = nonvide(sd(d@W$W6))
   
-  return(c(alpha,beta,delta,theta,K,sp))
+  return(c(wave1_ent,wave1_sd,wave2_ent,wave2_sd,wave3_ent,
+           wave3_sd,wave4_ent,wave4_sd,wave5_ent,wave5_sd,wave6_ent,wave6_sd))
 }
 
-wavelet(x)
-s = apply(eeg1,1,wavelet)
+wavelet_coeff(x)
+s = apply(eeg1,1,wavelet_coeff)
 df = as.data.frame(t(s))
-colnames(df) = c("alpha1_ent1","beta1_ent1","delta1_ent1","theta1_ent1","K1_ent1","sp1_ent1")
-df =cbind(yrandom,df)
+colnames(df) = c("wave1_ent_eeg1","wave1_sd_eeg1","wave2_ent_eeg1","wave2_sd_eeg1","wave3_ent_eeg1",
+                 "wave3_sd_eeg1","wave4_ent_eeg1","wave4_sd_eeg1","wave5_ent_eeg1","wave5_sd_eeg1","wave6_ent_eeg1","wave6_sd_eeg1")
+df =cbind(ytrain,df)
         
-write.csv(df,file = paste0(data_folder,"wavelets_eeg1_test.csv"),row.names = FALSE)
+write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg1.csv"),row.names = FALSE)
 
+
+#####rajouter un filtre => pakg signal
 #####RandomForest
 
 erreur_mat = function(ytrue,yhat){
@@ -123,7 +127,7 @@ df$sleep_stage = as.factor(df$sleep_stage)
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
 print(f_RandomForest)
 
-#Variables d'importance 
+n#Variables d'importance 
 imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
                                                     decreasing = TRUE), ])
 
