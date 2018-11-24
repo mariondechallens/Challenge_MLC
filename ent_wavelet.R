@@ -154,11 +154,11 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
                                                     decreasing = TRUE), ])
 
 
-f_RandomForest2 = randomForest(sleep_stage~.,data=df[,c("sleep_stage",rownames(imp)[1:20])])
+f_RandomForest2 = randomForest(sleep_stage~.,data=df[,c("sleep_stage",rownames(imp)[1:35])])
 print(f_RandomForest2)
 
-ent = read.csv(paste0(data_folder,"ent1.csv"))[,c(3,4,5,13)]
-df2 = cbind(df[,c("sleep_stage",rownames(imp)[1:30])],ent)
+sd = read.csv(paste0(data_folder,"basic_feat.csv"))[,c(4,6,8,24)]
+df2 = cbind(df[,c("sleep_stage",rownames(imp)[1:35])],sd)
 f_RandomForest3 = randomForest(sleep_stage~.,data=df2)
 print(f_RandomForest3)
 
@@ -167,9 +167,15 @@ dft = read.csv(paste0(data_folder,"wavelets_coeff_eeg1_test.csv"))
 for (i in 2:7)
 {
   data = read.csv(paste0(data_folder,"wavelets_coeff_eeg",i,"_test.csv"))
-  dft = merge(dft,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+  dft =cbind(dft,data)
 }
 rm(data)
+
+ytest = as.data.frame(predict(f_RandomForest2,dft[,rownames(imp)[1:35]]))
+ytest = cbind(yrandom[,1],ytest)
+colnames(ytest) =  c("id","sleep_stage")
+write.csv(ytest,file = paste0(data_folder,"ytest_w_coeff.csv"),row.names = FALSE)
+
 
 ### adaboost
 library(adabag)
