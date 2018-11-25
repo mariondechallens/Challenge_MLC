@@ -44,7 +44,7 @@ rassembler_feat = function(train = TRUE)
     for (i in 2:7)
     {
       data = read.csv(paste0(data_folder,"wavelets_coeff_eeg",i,"_test.csv"))
-      df =cbind(dft,data)
+      df =cbind(df,data)
     }
   }
   rm(data)

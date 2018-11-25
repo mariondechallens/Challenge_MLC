@@ -21,5 +21,19 @@ source(paste0(file_folder,"features.R"))
 
 
 ## création du modèle RF
+df = rassembler_feat()
+
+f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
+print(f_RandomForest)
+
+#Variables d'importance 
+imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
+                                                    decreasing = TRUE), ])
 
 
+#prediction
+dft = rassembler_feat(train = FALSE)
+ytest = as.data.frame(predict(f_RandomForest2,dft[,rownames(imp)[1:35]]))
+ytest = cbind(yrandom[,1],ytest)
+colnames(ytest) =  c("id","sleep_stage")
+write.csv(ytest,file = paste0(data_folder,"ytest_w_coeff.csv"),row.names = FALSE)
