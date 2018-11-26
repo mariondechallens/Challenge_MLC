@@ -40,13 +40,13 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
 
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(imp)[1:35])],ntree=500)
+                               data=df[,c("sleep_stage",rownames(imp)[1:40])],ntree=200)
 print(f_RandomForest2)
 
 basic = read.csv(paste0(data_folder,"ent_abs.csv"))[,c(4,6,8,24)]
 df2 = cbind(df[,c("sleep_stage",rownames(imp)[1:35])],basic)
-f_RandomForest3 = randomForest(sleep_stage~.,
-                               data=df2,ntree=500)
+f_RandomForest5 = randomForest(sleep_stage~.,
+                               data=df2,ntree=100)
 print(f_RandomForest3)
 
 
@@ -55,17 +55,20 @@ dft = rassembler_feat(train = FALSE)
 ytest = as.data.frame(predict(f_RandomForest2,dft[,rownames(imp)[1:35]]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
-write.csv(ytest,file = paste0(data_folder,"ytest_w_coeff.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_renyi_4w.csv"),row.names = FALSE)
 
 
+### score actuel
+# decompo en 4 ondelettes
+# calcul de ecart type et entropie de renyi dessus
 
 #### améliorations possibles:
 # - filtrer les signaux avant de calculer les features => deja fait dans dwt, essayer 
 #  d'autres filtres ? 
-# - decomposer en moins de vaguelettes (4?)
+# - decomposer en moins ou plus de vaguelettes 
 # - tester svm et adaboost
-# - calculer d'autres features entropie de Renyi
-# - caracteriser le stade 1 qui est pour l'instant inclassable
+# - calculer d'autres features 
+# - caracteriser le stade 1 qui est pour l'instant inclassable !!!!!!! 
 # - frequences ?
 # - decomposer aussi les accelerometre et pulsometre?
 
