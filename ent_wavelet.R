@@ -25,27 +25,11 @@ plot(as.numeric(x),type="l",ylab="Amplitude en uV")
 # plot(xb)
 # d = dwt(as.numeric(xb),n.levels = 6)
 
-
-entropie1 = function(x){
-  x = as.numeric(x)
-  tot = 0
-  ent = 0
-  for (i in 1:length(x))
-    tot = tot + x[i]^2
-  
-  for (i in 1:length(x))
-    quo = x[i]^2 / tot
-  ent = ent + (quo * log10(quo))
-  
-  return (-ent)  
-}
-
-nonvide = function(x){
-  if (length(x) == 0)
-    return(0)
-  else
-    return(x)
-}
+spx = spec(as.numeric(x),f = 50,plot = FALSE)
+ent =  sh(spx, alpha = "shannon")
+ent_r = sh(spx, alpha = 0.5)
+w = dwt(as.numeric(x),n.levels = 4,filter = "d20")
+sh(spec(w@W$W1,f=50,plot = FALSE), alpha =0.4)
 
 wavelet = function(x)
 {
@@ -80,31 +64,7 @@ wavelet = function(x)
 
 
 
-wavelet_coeff = function(x)
-{
-  d = dwt(as.numeric(x),n.levels = 6)
- 
-  wave1_ent = nonvide(entropie1(d@W$W1))
-  wave1_sd = nonvide(sd(d@W$W1))
-  
-  wave2_ent = nonvide(entropie1(d@W$W2))
-  wave2_sd = nonvide(sd(d@W$W2))
-  
-  wave3_ent = nonvide(entropie1(d@W$W3))
-  wave3_sd = nonvide(sd(d@W$W3))
-  
-  wave4_ent = nonvide(entropie1(d@W$W4))
-  wave4_sd = nonvide(sd(d@W$W4))
-  
-  wave5_ent = nonvide(entropie1(d@W$W5))
-  wave5_sd = nonvide(sd(d@W$W5))
-  
-  wave6_ent = nonvide(entropie1(d@W$W6))
-  wave6_sd = nonvide(sd(d@W$W6))
-  
-  return(c(wave1_ent,wave1_sd,wave2_ent,wave2_sd,wave3_ent,
-           wave3_sd,wave4_ent,wave4_sd,wave5_ent,wave5_sd,wave6_ent,wave6_sd))
-}
+
 
 wavelet_coeff(x)
 

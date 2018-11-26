@@ -4,6 +4,7 @@
 library(h5,warn.conflicts = FALSE)
 library(wavelets)
 library(randomForest)
+library(seewaves)
 
 ## variables
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
@@ -19,6 +20,9 @@ xtest = h5file(name = paste0(data_folder,"test.h5/test.h5"))
 source(paste0(file_folder,"fonctions.R"))
 source(paste0(file_folder,"features.R"))
 
+## calcul des features
+calcul_feat_wavelets(xtrain)
+calcul_feat_wavelets(xtest, train = FALSE)
 
 ## création du modèle RF
 df = rassembler_feat()
@@ -27,13 +31,13 @@ f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
 print(f_RandomForest)
 
 #Variables d'importance 
-imp = as.data.frame(f_RandomForest3$importance[order(f_RandomForest3$importance[, 1], 
+imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
                                                     decreasing = TRUE), ])
 
 
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(imp)[1:35])],ntree=800)
+                               data=df[,c("sleep_stage",rownames(imp)[1:35])],ntree=500)
 print(f_RandomForest2)
 
 basic = read.csv(paste0(data_folder,"basic_feat.csv"))[,c(3,4,5,6,7,8,23,24)]
@@ -51,10 +55,12 @@ write.csv(ytest,file = paste0(data_folder,"ytest_w_coeff.csv"),row.names = FALSE
 
 
 #### améliorations possibles:
-# - filtrer les signaux avant de calculer les features
-# - decomposer en moins de vaguelettes
+# - filtrer les signaux avant de calculer les features => deja fait dans dwt, essayer 
+#  d'autres filtres ? 
+# - decomposer en moins de vaguelettes (4?)
 # - tester svm et adaboost
-# - calculer d'autres features' entropie de Renyi
-# - caracteriser le stade 1 qui est oour l'instant ' inclassable
+# - calculer d'autres features entropie de Renyi
+# - caracteriser le stade 1 qui est pour l'instant inclassable
 # - frequences ?
+# - decomposer aussi les accelerometre et pulsometre?
 
