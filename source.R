@@ -24,6 +24,9 @@ source(paste0(file_folder,"features.R"))
 calcul_feat_wavelets(xtrain)
 calcul_feat_wavelets(xtest, train = FALSE)
 
+calcul_feat_entropie(xtrain)
+calcul_feat_entropie(xtest,train = FALSE)
+
 ## création du modèle RF
 df = rassembler_feat()
 
@@ -40,11 +43,13 @@ f_RandomForest2 = randomForest(sleep_stage~.,
                                data=df[,c("sleep_stage",rownames(imp)[1:35])],ntree=500)
 print(f_RandomForest2)
 
-basic = read.csv(paste0(data_folder,"basic_feat.csv"))[,c(3,4,5,6,7,8,23,24)]
+basic = read.csv(paste0(data_folder,"ent_abs.csv"))[,c(4,6,8,24)]
 df2 = cbind(df[,c("sleep_stage",rownames(imp)[1:35])],basic)
 f_RandomForest3 = randomForest(sleep_stage~.,
-                               data=df2,ntree=1000)
-print(f_RandomForest3) ### nul
+                               data=df2,ntree=500)
+print(f_RandomForest3)
+
+
 #prediction
 dft = rassembler_feat(train = FALSE)
 ytest = as.data.frame(predict(f_RandomForest2,dft[,rownames(imp)[1:35]]))

@@ -41,7 +41,7 @@ calcul_feat_entropie = function(x,train = TRUE) # sur accélerometre et pulsometr
     j = j+1
   }
     rm(data)
-    colnames(df)[,3:ncol(df)] = c("accx_ent","accy_ent","accz_ent","oxy_ent")
+    colnames(df)[3:ncol(df)] = c("accx_ent","accy_ent","accz_ent","oxy_ent")
     
   if (train)
     {
