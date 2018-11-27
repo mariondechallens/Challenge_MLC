@@ -4,7 +4,7 @@
 library(h5,warn.conflicts = FALSE)
 library(wavelets)
 library(randomForest)
-library(seewaves)
+library(seewave)
 
 ## variables
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
@@ -28,7 +28,8 @@ calcul_feat_entropie(xtrain)
 calcul_feat_entropie(xtest,train = FALSE)
 
 ## création du modèle RF
-df = rassembler_feat()
+df_eeg = rassembler_feat()
+df_acc = rassembler_feat()
 
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
 print(f_RandomForest)

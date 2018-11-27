@@ -44,6 +44,10 @@ abs_deviation = function(x)
 #feature : MMD (max min distance <=> amplitude)
 MMD = function(x){
   x = as.numeric(x)
+  if (length(x) > 100)
+    lambda = 100
+  else
+    lambda = 10
   res = 0
   n = length(x)/lambda
   for (i in 1:n)
@@ -93,24 +97,24 @@ wavelet_coeff6 = function(x)
            wave3_sd,wave4_ent,wave4_sd,wave5_ent,wave5_sd,wave6_ent,wave6_sd))
 }
 
-### decomposition en 4 ondelettes et filtre Daubechies 20, calcule sd et entr Renyi alpha = 0.4
+### decomposition en 4 ondelettes et filtre Daubechies 20, calcule mmd et shannon 
 wavelet_coeff4 = function(x)
 {
   d = dwt(as.numeric(x),n.levels = 4,filter = "d20")
   
-  wave1_ent = sh(spec(nonvide(d@W$W1),f=50,plot = FALSE), alpha =0.5)
-  wave1_sd = nonvide(sd(d@W$W1))
+  wave1_ent = sh(spec(nonvide(d@W$W1),f=50,plot = FALSE))
+  wave1_mmd = MMD(nonvide(d@W$W1))
   
-  wave2_ent = sh(spec(nonvide(d@W$W2),f=50,plot = FALSE), alpha =0.5)
-  wave2_sd = nonvide(sd(d@W$W2))
+  wave2_ent = sh(spec(nonvide(d@W$W2),f=50,plot = FALSE))
+  wave2_mmd = MMD(nonvide(d@W$W2))
   
-  wave3_ent = sh(spec(nonvide(d@W$W3),f=50,plot = FALSE), alpha =0.5)
-  wave3_sd = nonvide(sd(d@W$W3))
+  wave3_ent = sh(spec(nonvide(d@W$W3),f=50,plot = FALSE))
+  wave3_mmd = MMD(nonvide(d@W$W3))
   
-  wave4_ent = sh(spec(nonvide(d@W$W4),f=50,plot = FALSE), alpha =0.5)
-  wave4_sd = nonvide(sd(d@W$W4))
+  wave4_ent = sh(spec(nonvide(d@W$W4),f=50,plot = FALSE))
+  wave4_mmd = MMD(nonvide(d@W$W4))
   
-  return(c(wave1_ent,wave1_sd,wave2_ent,wave2_sd,wave3_ent,
-           wave3_sd,wave4_ent,wave4_sd))
+  return(c(wave1_ent,wave1_mmd,wave2_ent,wave2_mmd,wave3_ent,
+           wave3_mmd,wave4_ent,wave4_mmd))
 }
 

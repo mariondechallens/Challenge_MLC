@@ -2,24 +2,42 @@
 
 calcul_feat_wavelets = function(x,train = TRUE) #x = xtrain ou xtest
 {
-  for (i in 4:10)
+  for (i in 4:10)  #c(1,2,3,11)) #
   {
     print(i)
     data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
     s = apply(data,1,wavelet_coeff4)
     df = as.data.frame(t(s))
-    colnames(df) = c(paste0("wave1_ent_eeg",i-3),paste0("wave1_sd_eeg",i-3),paste0("wave2_ent_eeg",i-3),paste0("wave2_sd_eeg",i-3),paste0("wave3_ent_eeg",i-3),
-                     paste0("wave3_sd_eeg",i-3),paste0("wave4_ent_eeg",i-3),paste0("wave4_sd_eeg",i-3))
+    # colnames(df) = c(paste0("wave1_ent_eeg",i-3),
+    #                  paste0("wave1_mmd_eeg",i-3),
+    #                  paste0("wave2_ent_eeg",i-3),
+    #                  paste0("wave2_mmd_eeg",i-3),
+    #                  paste0("wave3_ent_eeg",i-3),
+    #                  paste0("wave3_mmd_eeg",i-3),
+    #                  paste0("wave4_ent_eeg",i-3),
+    #                  paste0("wave4_mmd_eeg",i-3))
+    
+    colnames(df) = c(paste0("wave1_ent_acc",i),
+                     paste0("wave1_mmd_acc",i),
+                     paste0("wave2_ent_acc",i),
+                     paste0("wave2_mmd_acc",i),
+                     paste0("wave3_ent_acc",i),
+                     paste0("wave3_mmd_acc",i),
+                     paste0("wave4_ent_acc",i),
+                     paste0("wave4_mmd_acc",i))
                      #,paste0("wave5_ent_eeg",i-3),paste0("wave5_sd_eeg",i-3),
                      #paste0("wave6_ent_eeg",i-3),paste0("wave6_sd_eeg",i-3))
     
     if (train)
     {
       df =cbind(ytrain,df)
-      write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg_R4_",i-3,".csv"),row.names = FALSE)
-    }
+      #write.csv(df,file = paste0(data_folder,"wavelets_coeff_RS_mmd_eeg",i-3,".csv"),row.names = FALSE)
+      write.csv(df,file = paste0(data_folder,"wavelets_coeff_RS_mmd_acc",i,".csv"),row.names = FALSE)
+      
+      }
     else
-      write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg_R4_",i-3,"_test.csv"),row.names = FALSE)
+     # write.csv(df,file = paste0(data_folder,"wavelets_coeff_RS_mmd_egg",i-3,"_test.csv"),row.names = FALSE)
+      write.csv(df,file = paste0(data_folder,"wavelets_coeff_RS_mmd_acc",i,".csv"),row.names = FALSE)
     
       
   }
@@ -57,10 +75,12 @@ rassembler_feat = function(train = TRUE)
 {
   if (train)
   {
-    df = read.csv(paste0(data_folder,"wavelets_coeff_eeg_R4_1.csv"))
-    for (i in 2:7)
+    df = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_eeg1.csv"))
+    #df = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_acc1.csv"))
+    for (i in 2:7) # (i in c(2,3,11))
     {
-      data = read.csv(paste0(data_folder,"wavelets_coeff_eeg_R4_",i,".csv"))
+      data = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_eeg",i,".csv"))
+      #data = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_acc",i,".csv"))
       df = merge(df,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
     }
     df$sleep_stage = as.factor(df$sleep_stage)
@@ -68,10 +88,12 @@ rassembler_feat = function(train = TRUE)
   
   else
   {
-    df = read.csv(paste0(data_folder,"wavelets_coeff_eeg_R4_1_test.csv"))
-    for (i in 2:7)
+    df = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_egg1_test.csv"))
+    #df = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_acc1_test.csv"))
+    for (i in 2:7) # (i in c(-1,0,8))
     {
-      data = read.csv(paste0(data_folder,"wavelets_coeff_eeg_R4_",i,"_test.csv"))
+      data = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_egg",i,"_test.csv"))
+      #data = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_acc",i,"_test.csv"))
       df =cbind(df,data)
     }
   }
