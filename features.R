@@ -2,7 +2,7 @@
 
 calcul_feat_wavelets = function(x,train = TRUE) #x = xtrain ou xtest
 {
-  for (i in 4:10)  #c(1,2,3,11)) #
+  for (i in c(1,2,3,11)) #4:10)
   {
     print(i)
     data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
@@ -37,7 +37,7 @@ calcul_feat_wavelets = function(x,train = TRUE) #x = xtrain ou xtest
       }
     else
      # write.csv(df,file = paste0(data_folder,"wavelets_coeff_RS_mmd_egg",i-3,"_test.csv"),row.names = FALSE)
-      write.csv(df,file = paste0(data_folder,"wavelets_coeff_RS_mmd_acc",i,".csv"),row.names = FALSE)
+      write.csv(df,file = paste0(data_folder,"wavelets_coeff_RS_mmd_acc",i,"_test.csv"),row.names = FALSE)
     
       
   }
