@@ -102,16 +102,16 @@ wavelet_coeff4 = function(x)
 {
   d = dwt(as.numeric(x),n.levels = 4,filter = "d20")
   
-  wave1_ent = sh(spec(nonvide(d@W$W1),f=50,plot = FALSE))
+  wave1_ent = sh(spec(nonvide(d@W$W1),f=10,plot = FALSE))
   wave1_mmd = MMD(nonvide(d@W$W1))
   
-  wave2_ent = sh(spec(nonvide(d@W$W2),f=50,plot = FALSE))
+  wave2_ent = sh(spec(nonvide(d@W$W2),f=10,plot = FALSE))
   wave2_mmd = MMD(nonvide(d@W$W2))
   
-  wave3_ent = sh(spec(nonvide(d@W$W3),f=50,plot = FALSE))
+  wave3_ent = sh(spec(nonvide(d@W$W3),f=10,plot = FALSE))
   wave3_mmd = MMD(nonvide(d@W$W3))
   
-  wave4_ent = sh(spec(nonvide(d@W$W4),f=50,plot = FALSE))
+  wave4_ent = sh(spec(nonvide(d@W$W4),f=10,plot = FALSE))
   wave4_mmd = MMD(nonvide(d@W$W4))
   
   return(c(wave1_ent,wave1_mmd,wave2_ent,wave2_mmd,wave3_ent,
