@@ -46,20 +46,26 @@ MMD = function(x){
   x = as.numeric(x)
   if (length(x) > 100)
     lambda = 100
-  else
+  if (length(x) > 10)
     lambda = 10
+  
   res = 0
   n = length(x)/lambda
-  for (i in 1:n)
+  
+  if (n > 10)
   {
-    x_i=x[(1 + (i-1)*lambda) : (i*lambda)]
-    My = max(x_i)
-    Mx = seq(along = x_i)[x_i== My]
-    my = min(x_i)
-    mx = seq(along = x_i)[x_i== my]
-    
-    res = res + sqrt((mx - Mx)^2 + (my - My)^2)
+    for (i in 1:n)
+    {
+      x_i=x[(1 + (i-1)*lambda) : (i*lambda)]
+      My = max(x_i)
+      Mx = seq(along = x_i)[x_i== My]
+      my = min(x_i)
+      mx = seq(along = x_i)[x_i== my]
+      
+      res = res + sqrt((mx - Mx)^2 + (my - My)^2)
+    }
   }
+  
   return(res)
 }
 

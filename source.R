@@ -28,8 +28,8 @@ calcul_feat_entropie(xtrain)
 calcul_feat_entropie(xtest,train = FALSE)
 
 ## création du modèle RF
-df_eeg = rassembler_feat()
-df_acc = rassembler_feat()
+df = rassembler_feat()
+#df_acc = rassembler_feat()
 
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
 print(f_RandomForest)
@@ -41,7 +41,7 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
 
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(imp)[1:40])],ntree=200)
+                               data=df[,c("sleep_stage",rownames(imp)[1:30])],ntree=200)
 print(f_RandomForest2)
 
 basic = read.csv(paste0(data_folder,"ent_abs.csv"))[,c(4,6,8,24)]
@@ -60,7 +60,7 @@ write.csv(ytest,file = paste0(data_folder,"ytest_renyi_4w.csv"),row.names = FALS
 
 
 ### score actuel
-# decompo en 4 ondelettes
+# decompo en 4 ondelettes, filtre daubechies 20
 # calcul de ecart type et entropie de renyi dessus
 
 #### améliorations possibles:
@@ -71,7 +71,8 @@ write.csv(ytest,file = paste0(data_folder,"ytest_renyi_4w.csv"),row.names = FALS
 # - calculer d'autres features 
 # - caracteriser le stade 1 qui est pour l'instant inclassable !!!!!!! 
 # - frequences ?
-# - decomposer aussi les accelerometre et pulsometre?
+# - decomposer aussi les accelerometre et pulsometre? ne marche pas sur xtest
 
 # - tester PCA et k neirest neighbors?
 
+# essai entropie shannon et mmd pas concluant
