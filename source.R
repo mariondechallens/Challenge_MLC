@@ -72,3 +72,5 @@ write.csv(ytest,file = paste0(data_folder,"ytest_renyi_4w.csv"),row.names = FALS
 # - frequences ?
 # - decomposer aussi les accelerometre et pulsometre?
 
+# - tester PCA et k neirest neighbors?
+
