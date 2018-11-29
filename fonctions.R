@@ -124,3 +124,29 @@ wavelet_coeff4 = function(x)
            wave3_mmd,wave4_ent,wave4_mmd))
 }
 
+### proportions des frequences alpha etc pour EEG
+freq_prop = function(x)
+{
+  pic = as.data.frame(fpeaks(seewave::spec(as.numeric(x),f = 50,plot = FALSE),plot = FALSE))
+  pic$freq = pic$freq*1000
+  n =  nrow(pic)
+  #alpha waves
+  f_alpha =  subset(pic,pic$freq >= 8 & pic$freq <= 13)
+  alpha = nrow(f_alpha)/n
+  
+  #theta waves
+  f_theta =  subset(pic,pic$freq >= 4 & pic$freq <= 8)
+  theta = nrow(f_theta)/n
+  
+  #delta waves
+  f_delta =  subset(pic,pic$freq >= 0.5 & pic$freq <= 4)
+  delta = nrow(f_delta)/n
+  
+  #beta waves
+  f_beta =  subset(pic,pic$freq >= 13 & pic$freq <= 30)
+  beta = nrow(f_beta)/n
+  
+  return(c(alpha,beta,delta,theta))
+}
+
+

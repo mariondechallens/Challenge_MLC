@@ -21,11 +21,9 @@ source(paste0(file_folder,"fonctions.R"))
 source(paste0(file_folder,"features.R"))
 
 ## calcul des features
-calcul_feat_wavelets(xtrain)
-calcul_feat_wavelets(xtest, train = FALSE)
+calcul_feat_freq_prop(xtrain)
+calcul_feat_freq_prop(xtest, train = FALSE)
 
-calcul_feat_entropie(xtrain)
-calcul_feat_entropie(xtest,train = FALSE)
 
 ## création du modèle RF
 df = rassembler_feat()
@@ -84,10 +82,8 @@ write.csv(ytest,file = paste0(data_folder,"ytest_renyi_4w.csv"),row.names = FALS
 # - decomposer en moins ou plus de vaguelettes 
 # - tester svm et adaboost
 # - calculer d'autres features 
-# - caracteriser le stade 1 qui est pour l'instant inclassable !!!!!!! 
-# - frequences ?
+# - caracteriser le stade 1 :  alpha (8???12Hz) bursts, 50% au moins de alpha et alpha et theta (4-7Hz)
+# => revenir sur l'idée des proportions des frequences ?
 # - decomposer aussi les accelerometre et pulsometre? ne marche pas sur xtest
 
 # - tester PCA et k neirest neighbors?
-
-# essai entropie shannon et mmd pas concluant
