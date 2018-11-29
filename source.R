@@ -26,10 +26,10 @@ calcul_feat_freq_prop(xtest, train = FALSE)
 
 
 ## création du modèle RF
-df = rassembler_feat()
-dfs = rassembler_feat2()
+dfw = rassembler_feat()
+dff = rassembler_feat_prop()
 
-#df_acc = rassembler_feat()
+df = merge(dfw,dff, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
 print(f_RandomForest)
@@ -64,12 +64,12 @@ print(f_RandomForest3)
 
 #prediction
 dft = rassembler_feat(train = FALSE)
-dfts = rassembler_feat2(train = FALSE)
-dftest =  cbind(dft[,c(rownames(imp)[1:30])],dfts[,c])
-ytest = as.data.frame(predict(f_RandomForest3,dftest[,rownames(imp3)[1:40]]))
+dfts = rassembler_feat_prop(train = FALSE)
+dftest =  cbind(dft,dfts)
+ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(imp)[1:30]]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
-write.csv(ytest,file = paste0(data_folder,"ytest_renyi_4w.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_freq_prop.csv"),row.names = FALSE)
 
 
 ### score actuel
@@ -83,7 +83,7 @@ write.csv(ytest,file = paste0(data_folder,"ytest_renyi_4w.csv"),row.names = FALS
 # - tester svm et adaboost
 # - calculer d'autres features 
 # - caracteriser le stade 1 :  alpha (8???12Hz) bursts, 50% au moins de alpha et alpha et theta (4-7Hz)
-# => revenir sur l'idée des proportions des frequences ?
+# => revenir sur l'idée des proportions des frequences ? ou des vaguelettes?
 # - decomposer aussi les accelerometre et pulsometre? ne marche pas sur xtest
 
 # - tester PCA et k neirest neighbors?
