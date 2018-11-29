@@ -66,15 +66,17 @@ print(f_RandomForest3)
 
 #prediction
 dft = rassembler_feat(train = FALSE)
-ytest = as.data.frame(predict(f_RandomForest2,dft[,rownames(imp)[1:30]]))
+dfts = rassembler_feat2(train = FALSE)
+dftest =  cbind(dft[,c(rownames(imp)[1:30])],dfts[,c])
+ytest = as.data.frame(predict(f_RandomForest3,dftest[,rownames(imp3)[1:40]]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 write.csv(ytest,file = paste0(data_folder,"ytest_renyi_4w.csv"),row.names = FALSE)
 
 
 ### score actuel
-# decompo en 4 ondelettes, filtre daubechies 20, 30 ou 35 variables
-# calcul de ecart type et entropie de renyi dessus
+# decompo en 4 ondelettes calcul, filtre daubechies 20, 40 variables
+# calcul de ecart type et entropie de renyi dessus et mmd
 
 #### améliorations possibles:
 # - filtrer les signaux avant de calculer les features => deja fait dans dwt, essayer 

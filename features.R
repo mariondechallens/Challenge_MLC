@@ -118,11 +118,11 @@ rassembler_feat2 = function(train = TRUE)
   
   else
   {
-    df = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_eeg1_test.csv"))
+    df = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_egg1_test.csv"))
     #df = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_acc1_test.csv"))
     for (i in 2:7) # (i in c(-1,0,8))
     {
-      data = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_eeg",i,"_test.csv"))
+      data = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_egg",i,"_test.csv"))
       #data = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_acc",i,"_test.csv"))
       df =cbind(df,data)
     }
