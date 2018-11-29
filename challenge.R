@@ -1,7 +1,7 @@
 # installer tinytex pour generation de pdf
-# install.packages('tinytex')
-# tinytex::install_tinytex()
-# tinytex:::is_tinytex()
+install.packages('tinytex')
+tinytex::install_tinytex()
+tinytex:::is_tinytex()
 
 # Generer le pdf
 # library(rmarkdown)
