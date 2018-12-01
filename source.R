@@ -54,7 +54,7 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
 
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(imp)[1:30])],ntree=500)
+                               data=df[,c("sleep_stage",rownames(imp)[1:37])],ntree=500,mtry = 12)
 print(f_RandomForest2)
 
 basic = read.csv(paste0(data_folder,"basic_feat.csv"))
@@ -76,14 +76,14 @@ print(f_RandomForest3)
 
 
 #prediction
-dft = rassembler_feat2(train = FALSE)
-dfts = rassembler_feat_prop(train = FALSE)
+dft = rassembler_feat(train = FALSE)
+dfts = rassembler_feat_alpha(train = FALSE)
 dftest =  cbind(dft,dfts)
-ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(imp)[1:30]]))
+ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(imp)[1:37]]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
-#write.csv(ytest,file = paste0(data_folder,"ytest_freq_prop.csv"),row.names = FALSE)
-write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_alpha.csv"),row.names = FALSE)
+#write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)
 
 
 ### score actuel
