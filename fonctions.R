@@ -25,10 +25,6 @@ entropie2 = function(x){
   return (-ent)  
 }
 
-entropie_Renyi_acc = function(x, alpha = 0.5)
-{
-  return (sh(spec(as.numeric(x),f=10,plot = FALSE), alpha =0.5))
-}
 
 ## deviation absolue par rapport à la moyenne
 abs_deviation = function(x)
@@ -46,7 +42,7 @@ MMD = function(x){
   x = as.numeric(x)
   if (length(x) > 100)
     lambda = 100
-  if (length(x) > 10)
+  if (length(x) > 10 && length(x) <= 100)
     lambda = 10
   
   res = 0
@@ -150,4 +146,11 @@ freq_prop = function(x)
   return(c(alpha,beta,delta,theta))
 }
 
-
+alpha = function(x)
+{
+  x_alpha = ffilter(as.numeric(x),f=50,from = 8, to = 13)
+  ent = sh(spec(nonvide(x_alpha),f=50,plot = FALSE), alpha =0.5)
+  mmd = MMD(nonvide(x_alpha))
+  sd = sd(nonvide(x_alpha))
+  return(c(ent,mmd,sd))
+}

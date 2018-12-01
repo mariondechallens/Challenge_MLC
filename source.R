@@ -7,11 +7,11 @@ library(randomForest)
 library(seewave)
 
 ## variables
-#data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
-#file_folder = "C:/Users/Admin/Documents/GitHub/Challenge_MLC/"
+data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
+file_folder = "C:/Users/Admin/Documents/GitHub/Challenge_MLC/"
 
-data_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
-file_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
+# data_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
+# file_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
 
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
 yrandom = read.csv(paste0(data_folder,"sample_submission.csv"))
@@ -24,21 +24,25 @@ source(paste0(file_folder,"fonctions.R"))
 source(paste0(file_folder,"features.R"))
 
 ## calcul des features
-calcul_feat_entropie(xtrain)
-calcul_feat_entropie(xtest, train = FALSE)
+# calcul_feat_entropie(xtrain)
+# calcul_feat_entropie(xtest, train = FALSE)
+# 
+# calcul_feat_wavelets(xtrain)
+# calcul_feat_wavelets(xtest, train = FALSE)
+# 
+# calcul_feat_freq_prop(xtrain)
+# calcul_feat_freq_prop(xtest, train = FALSE)
 
-calcul_feat_wavelets(xtrain)
-calcul_feat_wavelets(xtest, train = FALSE)
-
-calcul_feat_freq_prop(xtrain)
-calcul_feat_freq_prop(xtest, train = FALSE)
-
+calcul_feat_alpha(xtrain)
+calcul_feat_alpha(xtest, train = FALSE)
 
 ## création du modèle RF
-dfw = rassembler_feat2()
-dff = rassembler_feat_prop()
+dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
+#dfw = rassembler_feat2()  ##ent RS et mmd sur vaguelettes
+#dff = rassembler_feat_prop()
+dfa = rassembler_feat_alpha()
 
-df = merge(dfw,dff, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+df = merge(dfw,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
 print(f_RandomForest)
