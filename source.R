@@ -44,7 +44,7 @@ dfa = rassembler_feat_alpha()
 
 df = merge(dfw,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
-f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)])
+f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 12)
 print(f_RandomForest)
 
 #Variables d'importance 
@@ -54,7 +54,7 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
 
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(imp)[1:37])],ntree=500,mtry = 12)
+                               data=df[,c("sleep_stage",rownames(imp)[1:38])],ntree=800,mtry = 48)
 print(f_RandomForest2)
 
 basic = read.csv(paste0(data_folder,"basic_feat.csv"))
@@ -79,7 +79,7 @@ print(f_RandomForest3)
 dft = rassembler_feat(train = FALSE)
 dfts = rassembler_feat_alpha(train = FALSE)
 dftest =  cbind(dft,dfts)
-ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(imp)[1:37]]))
+ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(imp)[1:38]]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 write.csv(ytest,file = paste0(data_folder,"ytest_alpha.csv"),row.names = FALSE)
