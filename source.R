@@ -7,8 +7,11 @@ library(randomForest)
 library(seewave)
 
 ## variables
-data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
-file_folder = "C:/Users/Admin/Documents/GitHub/Challenge_MLC/"
+#data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
+#file_folder = "C:/Users/Admin/Documents/GitHub/Challenge_MLC/"
+
+data_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
+file_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
 
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
 yrandom = read.csv(paste0(data_folder,"sample_submission.csv"))
@@ -21,12 +24,18 @@ source(paste0(file_folder,"fonctions.R"))
 source(paste0(file_folder,"features.R"))
 
 ## calcul des features
+calcul_feat_entropie(xtrain)
+calcul_feat_entropie(xtest, train = FALSE)
+
+calcul_feat_wavelets(xtrain)
+calcul_feat_wavelets(xtest, train = FALSE)
+
 calcul_feat_freq_prop(xtrain)
 calcul_feat_freq_prop(xtest, train = FALSE)
 
 
 ## création du modèle RF
-dfw = rassembler_feat()
+dfw = rassembler_feat2()
 dff = rassembler_feat_prop()
 
 df = merge(dfw,dff, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
@@ -63,13 +72,14 @@ print(f_RandomForest3)
 
 
 #prediction
-dft = rassembler_feat(train = FALSE)
+dft = rassembler_feat2(train = FALSE)
 dfts = rassembler_feat_prop(train = FALSE)
 dftest =  cbind(dft,dfts)
 ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(imp)[1:30]]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
-write.csv(ytest,file = paste0(data_folder,"ytest_freq_prop.csv"),row.names = FALSE)
+#write.csv(ytest,file = paste0(data_folder,"ytest_freq_prop.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)
 
 
 ### score actuel
