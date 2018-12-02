@@ -41,13 +41,13 @@ dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
 #dfw = rassembler_feat2()  ##ent RS et mmd sur vaguelettes
 #dff = rassembler_feat_prop()
 dfa = rassembler_feat_alpha()
-#sd_acc = read.csv(paste0(data_folder,"basic_feat.csv"))[,c(1,2,4,6,8,24)]
+sd_acc = read.csv(paste0(data_folder,"basic_feat.csv"))[,c(1,2,4,6,8,24)]
 #mmd_acc = read.csv(paste0(data_folder,"mmd_esis_acc_oxy.csv"))[,c(1,2,3,5,7,9)]
 
 df = merge(dfw,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,sd_acc, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
-f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 12)
+f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 48)
 print(f_RandomForest)
 
 #Variables d'importance 
@@ -57,9 +57,9 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
 
 #better model ?
 f_RandomForest3 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 275)))],ntree=900,mtry = 48)
+                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 599)))],ntree=900,mtry = 48)
 print(f_RandomForest3)
-
+## 0.96 pour N1, mais moins bon sur N0
 
 #prediction
 dft = rassembler_feat(train = FALSE)
