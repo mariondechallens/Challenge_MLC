@@ -41,8 +41,11 @@ dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
 #dfw = rassembler_feat2()  ##ent RS et mmd sur vaguelettes
 #dff = rassembler_feat_prop()
 dfa = rassembler_feat_alpha()
+#sd_acc = read.csv(paste0(data_folder,"basic_feat.csv"))[,c(1,2,4,6,8,24)]
+#mmd_acc = read.csv(paste0(data_folder,"mmd_esis_acc_oxy.csv"))[,c(1,2,3,5,7,9)]
 
 df = merge(dfw,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+df = merge(df,sd_acc, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 12)
 print(f_RandomForest)
@@ -53,42 +56,29 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
 
 
 #better model ?
-f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(imp)[1:38])],ntree=800,mtry = 48)
-print(f_RandomForest2)
-
-basic = read.csv(paste0(data_folder,"basic_feat.csv"))
-c = rep(0,27)
-for (i in 1:27)
-  c[i] = (i+1)*2
-
-df2 = cbind(df[,c("sleep_stage",rownames(imp)[1:30])],dfs[,c])
-f_RandomForest5 = randomForest(sleep_stage~.,
-                               data=df2,ntree=500)
-print(f_RandomForest5)
-
-imp3 = as.data.frame(f_RandomForest5$importance[order(f_RandomForest5$importance[, 1], 
-                                                             decreasing = TRUE), ])
-
 f_RandomForest3 = randomForest(sleep_stage~.,
-                               data=df2[,c("sleep_stage",rownames(imp3)[1:40])],ntree=800)
+                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 275)))],ntree=900,mtry = 48)
 print(f_RandomForest3)
 
 
 #prediction
 dft = rassembler_feat(train = FALSE)
 dfts = rassembler_feat_alpha(train = FALSE)
+sd_acc_t = read.csv(paste0(data_folder,"basic_feat_test.csv"))[,c(2,4,6,22)]
+
 dftest =  cbind(dft,dfts)
-ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(imp)[1:38]]))
+dftest = cbind(dftest,sd_acc_t)
+
+ytest = as.data.frame(predict(f_RandomForest3,dftest[,rownames(subset(imp,imp[,1] > 275))]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
-write.csv(ytest,file = paste0(data_folder,"ytest_alpha.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_alpha_sd.csv"),row.names = FALSE)
 #write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)
 
 
 ### score actuel
 # decompo en 4 ondelettes calcul, filtre daubechies 20, 40 variables
-# calcul de ecart type et entropie de renyi dessus et mmd
+# calcul de ecart type et entropie de renyi dessus et sd et sd sur ondes alpha
 
 #### améliorations possibles:
 # - filtrer les signaux avant de calculer les features => deja fait dans dwt, essayer 
