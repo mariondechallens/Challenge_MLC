@@ -89,7 +89,8 @@ write.csv(ytest,file = paste0(data_folder,"ytest_freq_feat.csv"),row.names = FAL
 
 ### score actuel
 # decompo en 4 ondelettes calcul, filtre daubechies 20, 40 variables
-# calcul de ecart type et entropie de renyi dessus et sd et sd sur ondes alpha
+# calcul de ecart type et entropie de renyi dessus et sd et amplitudes relatives des 
+# ondes alpha, theta etc
 
 #### améliorations possibles:
 # enlever les valeurs aberrantes dans le df rassemblé 
