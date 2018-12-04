@@ -39,13 +39,14 @@ calcul_feat_alpha(xtest, train = FALSE)
 ## création du modèle RF
 dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
 #dfw = rassembler_feat2()  ##ent RS et mmd sur vaguelettes
-#dff = rassembler_feat_prop()
+dff = rassembler_feat_prop()
 dfa = rassembler_feat_alpha()
-sd_acc = read.csv(paste0(data_folder,"basic_feat.csv"))[,c(1,2,4,6,8,24)]
+sd_acc = read.csv(paste0(data_folder,"basic_feat.csv")) #[,c(1,2,4,6,8,24)]
 #mmd_acc = read.csv(paste0(data_folder,"mmd_esis_acc_oxy.csv"))[,c(1,2,3,5,7,9)]
 
 df = merge(dfw,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,sd_acc, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+df = merge(df,dff, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 48)
 print(f_RandomForest)
@@ -57,33 +58,27 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
 
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 500)))],ntree=800,mtry = 48)
+                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 200)))],ntree=700,mtry = 48)
 print(f_RandomForest2)
-## 0.96 pour N1, mais moins bon sur N0
+
 
 #prediction
 dft = rassembler_feat(train = FALSE)
 dfts = rassembler_feat_alpha(train = FALSE)
-sd_acc_t = read.csv(paste0(data_folder,"basic_feat_test.csv"))[,c(2,4,6,22)]
+sd_acc_t = read.csv(paste0(data_folder,"basic_feat_test.csv"))  #[,c(2,4,6,22)]
+dfft = rassembler_feat_prop(train = FALSE)
 
 dftest =  cbind(dft,dfts)
 dftest = cbind(dftest,sd_acc_t)
+dftest = cbind(dftest,dfft)
 
-ytest = as.data.frame(predict(f_RandomForest,dftest))
+ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(subset(imp,imp[,1] > 200))]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 
-ytest2 = as.data.frame(predict(f_RandomForest2,dftest[,rownames(subset(imp,imp[,1] > 500))]))
-ytest2 = cbind(yrandom[,1],ytest2)
-colnames(ytest2) =  c("id","sleep_stage")
 
-for (i in 1:nrow(ytest3))
-{
-  if (ytest2$sleep_stage[i] == 1)
-    ytest$sleep_stage[i] = 1
-}
 
-write.csv(ytest,file = paste0(data_folder,"ytest_alpha_sd3.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_alpha_prop_basic.csv"),row.names = FALSE)
 #write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)
 
 
@@ -92,13 +87,20 @@ write.csv(ytest,file = paste0(data_folder,"ytest_alpha_sd3.csv"),row.names = FAL
 # calcul de ecart type et entropie de renyi dessus et sd et sd sur ondes alpha
 
 #### améliorations possibles:
-# - filtrer les signaux avant de calculer les features => deja fait dans dwt, essayer 
-#  d'autres filtres ? 
-# - decomposer en moins ou plus de vaguelettes 
-# - tester svm et adaboost
-# - calculer d'autres features 
-# - caracteriser le stade 1 :  alpha (8???12Hz) bursts, 50% au moins de alpha et alpha et theta (4-7Hz)
-# => revenir sur l'idée des proportions des frequences ? ou des vaguelettes?
-# - decomposer aussi les accelerometre et pulsometre? ne marche pas sur xtest
 
 # - tester PCA et k neirest neighbors?
+
+# tester SVM
+
+library("e1071")
+
+x <- df[,3:ncol(df)]
+y <- df[,"sleep_stage"]
+model <- svm(x, y) 
+
+print(model)
+
+# test with train data
+pred <- predict(model, x)
+# Check accuracy:
+table(pred, y)

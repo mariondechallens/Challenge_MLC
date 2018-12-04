@@ -177,13 +177,13 @@ rassembler_feat_prop = function(train = TRUE)
 {
   if (train)
   {
-    #df = read.csv(paste0(data_folder,"freq_prop_eeg1.csv"))
-    df = read.csv(paste0("freq_prop_eeg1.csv"))
+    df = read.csv(paste0(data_folder,"freq_prop_eeg1.csv"))
+    #df = read.csv(paste0("freq_prop_eeg1.csv"))
     for (i in 2:7) 
     {
-   #   data = read.csv(paste0(data_folder,"freq_prop_eeg",i,".csv"))
+      data = read.csv(paste0(data_folder,"freq_prop_eeg",i,".csv"))
 
-      data = read.csv(paste0("freq_prop_eeg",i,".csv"))
+      #data = read.csv(paste0("freq_prop_eeg",i,".csv"))
       df = merge(df,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
     }
     df$sleep_stage = as.factor(df$sleep_stage)
@@ -191,12 +191,12 @@ rassembler_feat_prop = function(train = TRUE)
   
   else
   {
-    #df = read.csv(paste0(data_folder,"freq_prop_egg1_test.csv"))
-    df = read.csv(paste0("freq_prop_egg1_test.csv"))
+    df = read.csv(paste0(data_folder,"freq_prop_egg1_test.csv"))
+    #df = read.csv(paste0("freq_prop_egg1_test.csv"))
     for (i in 2:7) 
     {
-      #data = read.csv(paste0(data_folder,"freq_prop_egg",i,"_test.csv"))
-      data = read.csv(paste0("freq_prop_egg",i,"_test.csv"))
+      data = read.csv(paste0(data_folder,"freq_prop_egg",i,"_test.csv"))
+      #data = read.csv(paste0("freq_prop_egg",i,"_test.csv"))
       df =cbind(df,data)
     }
   }
