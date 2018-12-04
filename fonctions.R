@@ -146,6 +146,51 @@ freq_prop = function(x)
   return(c(alpha,beta,delta,theta))
 }
 
+### features des frequences alpha etc pour EEG
+freq_feat = function(x)
+{
+  x_filtered = ffilter(as.numeric(x),f=50,from = 0, to = 30)
+  pic = as.data.frame(fpeaks(seewave::spec(as.numeric(x_filtered),f = 50,plot = FALSE),plot = FALSE))
+  pic$freq = pic$freq*1000
+  #all 
+  amp = sum(abs(pic$amp))
+  amp2 = sum(pic$amp^2)
+  m = mean(pic$freq)
+  s = sd(pic$freq)
+  
+  #alpha waves
+  f_alpha =  subset(pic,pic$freq >= 8 & pic$freq <= 13)
+  alpha_amp = sum(abs(f_alpha$amp) )
+  alpha_amp_rel = alpha_amp/amp
+  alpha_m = mean(f_alpha$freq)
+  
+  #theta waves
+  f_theta =  subset(pic,pic$freq >= 4 & pic$freq <= 8)
+  theta_amp = sum(abs(f_theta$amp) ) 
+  theta_amp_rel = theta_amp/amp
+  theta_m = mean(f_theta$freq)
+  
+  #delta waves
+  f_delta =  subset(pic,pic$freq >= 0.5 & pic$freq <= 4)
+  delta_amp = sum(abs(f_delta$amp) )
+  delta_amp_rel = delta_amp/amp
+  delta_m = mean(f_delta$freq)
+  
+  #beta waves
+  f_beta =  subset(pic,pic$freq >= 13 & pic$freq <= 30)
+  beta_amp = sum(abs(f_beta$amp) )
+  beta_amp_rel = beta_amp/amp
+  beta_m = mean(f_beta$freq)
+  
+  return(c(amp,amp2,m,s,
+           alpha_amp,alpha_amp_rel,alpha_m,
+           theta_amp,theta_amp_rel,theta_m,
+           delta_amp,delta_amp_rel,delta_m,
+           beta_amp,beta_amp_rel,beta_m))
+           
+           
+}
+
 alpha = function(x)
 {
   x_alpha = ffilter(as.numeric(x),f=50,from = 8, to = 13)

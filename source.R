@@ -24,17 +24,12 @@ source(paste0(file_folder,"fonctions.R"))
 source(paste0(file_folder,"features.R"))
 
 ## calcul des features
-# calcul_feat_entropie(xtrain)
-# calcul_feat_entropie(xtest, train = FALSE)
-# 
-# calcul_feat_wavelets(xtrain)
-# calcul_feat_wavelets(xtest, train = FALSE)
-# 
-# calcul_feat_freq_prop(xtrain)
-# calcul_feat_freq_prop(xtest, train = FALSE)
 
-calcul_feat_alpha(xtrain)
-calcul_feat_alpha(xtest, train = FALSE)
+calcul_feat_freq(xtrain)
+calcul_feat_freq(xtest, train = FALSE)
+
+# calcul_feat_alpha(xtrain)
+# calcul_feat_alpha(xtest, train = FALSE)
 
 ## création du modèle RF
 dfw = rassembler_feat()  ##ent R et sd sur vaguelettes

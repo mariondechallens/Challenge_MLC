@@ -60,6 +60,33 @@ calcul_feat_freq_prop = function(x,train = TRUE) #x = xtrain ou xtest
   rm(data)
 }
 
+calcul_feat_freq = function(x,train = TRUE) #x = xtrain ou xtest
+{
+  for (i in 4:10)
+  {
+    print(i)
+    data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
+    s = apply(data,1,freq_feat)
+    df = as.data.frame(t(s))
+    colnames(df) = c(paste0("amp",i-3),paste0("amp2",i-3),paste0("m",i-3),paste0("s",i-3),
+                     paste0("alpha_amp",i-3),paste0("alpha_amp_rel",i-3),paste0("alpha_m",i-3),
+                     paste0("theta_amp",i-3),paste0("theta_amp_rel",i-3),paste0("theta_m",i-3),
+                     paste0("delta_amp",i-3),paste0("delta_amp_rel",i-3),paste0("delta_m",i-3),
+                     paste0("beta_amp",i-3),paste0("beta_amp_rel",i-3),paste0("beta_m",i-3))
+    
+    if (train)
+    {
+      df =cbind(ytrain,df)
+      write.csv(df,file = paste0(data_folder,"freq_feat_eeg",i-3,".csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("freq_prop_eeg",i-3,".csv"),row.names = FALSE)
+    }
+    else
+      write.csv(df,file = paste0(data_folder,"freq_feat_egg",i-3,"_test.csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("freq_prop_egg",i-3,"_test.csv"),row.names = FALSE)   
+  }
+  rm(data)
+}
+
 calcul_feat_entropie = function(x,train = TRUE) # sur accélerometre et pulsometre
 {
   if (train)
@@ -235,3 +262,33 @@ rassembler_feat_alpha = function(train = TRUE)
   return(df)
 }
 
+rassembler_feat_freq = function(train = TRUE)
+{
+  if (train)
+  {
+    df = read.csv(paste0(data_folder,"freq_feat_eeg1.csv"))
+    #df = read.csv(paste0("freq_feat_eeg1.csv"))
+    for (i in 2:7) 
+    {
+      data = read.csv(paste0(data_folder,"freq_feat_eeg",i,".csv"))
+      
+      #data = read.csv(paste0("freq_feat_eeg",i,".csv"))
+      df = merge(df,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+    }
+    df$sleep_stage = as.factor(df$sleep_stage)
+  }
+  
+  else
+  {
+    df = read.csv(paste0(data_folder,"freq_feat_egg1_test.csv"))
+    #df = read.csv(paste0("freq_feat_egg1_test.csv"))
+    for (i in 2:7) 
+    {
+      data = read.csv(paste0(data_folder,"freq_feat_egg",i,"_test.csv"))
+      #data = read.csv(paste0("freq_feat_egg",i,"_test.csv"))
+      df =cbind(df,data)
+    }
+  }
+  rm(data)
+  return(df)
+}
