@@ -32,16 +32,17 @@ calcul_feat_freq(xtest, train = FALSE)
 # calcul_feat_alpha(xtest, train = FALSE)
 
 ## création du modèle RF
-dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
-#dfw = rassembler_feat2()  ##ent RS et mmd sur vaguelettes
-dff = rassembler_feat_prop()
-dfa = rassembler_feat_alpha()
-sd_acc = read.csv(paste0(data_folder,"basic_feat.csv")) #[,c(1,2,4,6,8,24)]
-#mmd_acc = read.csv(paste0(data_folder,"mmd_esis_acc_oxy.csv"))[,c(1,2,3,5,7,9)]
+# dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
+# dfw = rassembler_feat2()  ##ent RS et mmd sur vaguelettes
+# dff = rassembler_feat_prop()
+# dfa = rassembler_feat_alpha()
+# sd_acc = read.csv(paste0(data_folder,"basic_feat.csv")) #[,c(1,2,4,6,8,24)]
+# 
+# df = merge(dfw,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+# df = merge(df,sd_acc, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+# df = merge(df,dff, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
-df = merge(dfw,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
-df = merge(df,sd_acc, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
-df = merge(df,dff, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+df = rassembler_feat_freq()
 
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 48)
 print(f_RandomForest)
@@ -58,15 +59,16 @@ print(f_RandomForest2)
 
 
 #prediction
-dft = rassembler_feat(train = FALSE)
-dfts = rassembler_feat_alpha(train = FALSE)
-sd_acc_t = read.csv(paste0(data_folder,"basic_feat_test.csv"))  #[,c(2,4,6,22)]
-dfft = rassembler_feat_prop(train = FALSE)
+# dft = rassembler_feat(train = FALSE)
+# dfts = rassembler_feat_alpha(train = FALSE)
+# sd_acc_t = read.csv(paste0(data_folder,"basic_feat_test.csv"))  #[,c(2,4,6,22)]
+# dfft = rassembler_feat_prop(train = FALSE)
+# 
+# dftest =  cbind(dft,dfts)
+# dftest = cbind(dftest,sd_acc_t)
+# dftest = cbind(dftest,dfft)
 
-dftest =  cbind(dft,dfts)
-dftest = cbind(dftest,sd_acc_t)
-dftest = cbind(dftest,dfft)
-
+dftest = rassembler_feat_freq()
 ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(subset(imp,imp[,1] > 200))]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
