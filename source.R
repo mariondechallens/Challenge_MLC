@@ -32,7 +32,7 @@ calcul_feat_freq(xtest, train = FALSE)
 # calcul_feat_alpha(xtest, train = FALSE)
 
 ## création du modèle RF
-# dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
+dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
 # dfw = rassembler_feat2()  ##ent RS et mmd sur vaguelettes
 # dff = rassembler_feat_prop()
 # dfa = rassembler_feat_alpha()
@@ -43,6 +43,7 @@ calcul_feat_freq(xtest, train = FALSE)
 # df = merge(df,dff, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
 df = rassembler_feat_freq()
+df[is.na(df)] = 0 #setting NA values to zero
 
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 48)
 print(f_RandomForest)
@@ -51,15 +52,22 @@ print(f_RandomForest)
 imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
                                                     decreasing = TRUE), ])
 
+df = merge(df[,c("id","sleep_stage",rownames(imp)[1:abs(nrow(imp)/4)])], dfw,by =c("id","sleep_stage"),all.x = TRUE, all.y=TRUE)
 
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 200)))],ntree=700,mtry = 48)
+                               data=df[,2:ncol(df)],ntree=700,mtry = 24)
 print(f_RandomForest2)
 
+imp2 = as.data.frame(f_RandomForest2$importance[order(f_RandomForest2$importance[, 1], 
+                                                    decreasing = TRUE), ])
+
+f_RandomForest3 = randomForest(sleep_stage~.,
+                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 300)))],ntree=700,mtry = 24)
+print(f_RandomForest3)
 
 #prediction
-# dft = rassembler_feat(train = FALSE)
+dft = rassembler_feat(train = FALSE)
 # dfts = rassembler_feat_alpha(train = FALSE)
 # sd_acc_t = read.csv(paste0(data_folder,"basic_feat_test.csv"))  #[,c(2,4,6,22)]
 # dfft = rassembler_feat_prop(train = FALSE)
@@ -68,14 +76,14 @@ print(f_RandomForest2)
 # dftest = cbind(dftest,sd_acc_t)
 # dftest = cbind(dftest,dfft)
 
-dftest = rassembler_feat_freq()
-ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(subset(imp,imp[,1] > 200))]))
+dftest = rassembler_feat_freq(train= FALSE)
+dftest =cbind(dftest[,rownames(imp)[1:abs(nrow(imp)/4)]], dft)
+
+ytest = as.data.frame(predict(f_RandomForest2,dftest))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 
-
-
-write.csv(ytest,file = paste0(data_folder,"ytest_alpha_prop_basic.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_freq_feat.csv"),row.names = FALSE)
 #write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)
 
 
@@ -84,8 +92,9 @@ write.csv(ytest,file = paste0(data_folder,"ytest_alpha_prop_basic.csv"),row.name
 # calcul de ecart type et entropie de renyi dessus et sd et sd sur ondes alpha
 
 #### améliorations possibles:
-
-# - tester PCA et k neirest neighbors?
+# enlever les valeurs aberrantes dans le df rassemblé 
+# (ex: valeurs deux fois plus grandes que la moyenne)
+# tester PCA et k neirest neighbors?
 
 # tester SVM
 
