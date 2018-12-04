@@ -94,13 +94,16 @@ write.csv(ytest,file = paste0(data_folder,"ytest_alpha_prop_basic.csv"),row.name
 
 library("e1071")
 
-x <- df[,3:ncol(df)]
-y <- df[,"sleep_stage"]
+x <- df[1:20000,3:ncol(df)]
+y <- df[1:20000,"sleep_stage"]
 model <- svm(x, y) 
 
 print(model)
 
 # test with train data
-pred <- predict(model, x)
+pred <- predict(model, df[20001:30000,3:ncol(df)])
 # Check accuracy:
-table(pred, y)
+M = table(pred, df[20001:30000,"sleep_stage"])
+print(M)
+(1-sum(diag(M))/sum(M)) ##erreur
+

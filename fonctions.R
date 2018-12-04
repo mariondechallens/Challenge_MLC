@@ -99,7 +99,7 @@ wavelet_coeff6 = function(x)
            wave3_sd,wave4_ent,wave4_sd,wave5_ent,wave5_sd,wave6_ent,wave6_sd))
 }
 
-### decomposition en 4 ondelettes et filtre Daubechies 20, calcule mmd et shannon 
+### decomposition en 4 ondelettes et filtre Daubechies 20, calcule mmd et entro
 wavelet_coeff4 = function(x)
 {
   d = dwt(as.numeric(x),n.levels = 4,filter = "d20")
