@@ -36,31 +36,44 @@ dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
 # dfw = rassembler_feat2()  ##ent RS et mmd sur vaguelettes
 # dff = rassembler_feat_prop()
 # dfa = rassembler_feat_alpha()
-# sd_acc = read.csv(paste0(data_folder,"basic_feat.csv")) #[,c(1,2,4,6,8,24)]
+sd_acc = read.csv(paste0(data_folder,"basic_feat.csv")) [,c(1,2,4,6,8,24)]
 # 
-# df = merge(dfw,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
-# df = merge(df,sd_acc, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
-# df = merge(df,dff, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+
 
 df = rassembler_feat_freq()
 df[is.na(df)] = 0 #setting NA values to zero
+df = merge(df,dfw, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+df = merge(df,sd_acc, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+# df = merge(df,dff, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
-f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 48)
+
+## removing outliers
+df_out = df
+# removing data when amplitude of subbands is two times larger than amp of the whole
+for (i in 1:7)
+{
+  print(i)
+  df_out = subset(df_out, df_out[,paste0("alpha_amp",i)] <= 2*df_out[,paste0("amp",i)] 
+                  && df_out[,paste0("theta_amp",i)] <= 2*df_out[,paste0("amp",i)]
+                  && df_out[,paste0("delta_amp",i)] <= 2*df_out[,paste0("amp",i)]
+                  &&df_out[,paste0("beta_amp",i)] <= 2*df_out[,paste0("amp",i)])
+}
+
+# removing zero values
+
+
+f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 64)
 print(f_RandomForest)
 
 #Variables d'importance 
 imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
                                                     decreasing = TRUE), ])
 
-df = merge(df[,c("id","sleep_stage",rownames(imp)[1:abs(nrow(imp)/4)])], dfw,by =c("id","sleep_stage"),all.x = TRUE, all.y=TRUE)
-
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,2:ncol(df)],ntree=700,mtry = 24)
+                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 170)))],ntree=700,mtry = 30)
 print(f_RandomForest2)
 
-imp2 = as.data.frame(f_RandomForest2$importance[order(f_RandomForest2$importance[, 1], 
-                                                    decreasing = TRUE), ])
 
 f_RandomForest3 = randomForest(sleep_stage~.,
                                data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 300)))],ntree=700,mtry = 24)
