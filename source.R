@@ -37,7 +37,7 @@ calcul_feat_base2(xtest, train = FALSE)
 dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
 df_abs = read.csv(paste0(data_folder,"basic_abs.csv"))
 # dff = rassembler_feat_prop()
-# dfa = rassembler_feat_alpha()
+dfa = rassembler_feat_alpha()
 # sd_acc = read.csv(paste0(data_folder,"basic_feat.csv")) [,c(1,2,4,6,8,24)]
 # 
 
@@ -46,7 +46,7 @@ df = rassembler_feat_freq()
 df[is.na(df)] = 0 #setting NA values to zero
 df = merge(df,dfw, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,df_abs, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
-# df = merge(df,dff, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+df = merge(df,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
 
 ## removing outliers
@@ -91,7 +91,7 @@ print(f_RandomForest2_o)
 
 #prediction
 dft = rassembler_feat(train = FALSE) ##ent R et sd sur vaguelettes
-# dfts = rassembler_feat_alpha(train = FALSE)
+df_alp = rassembler_feat_alpha(train = FALSE)
 #sd_acc_t = read.csv(paste0(data_folder,"basic_feat_test.csv"))[,c(2,4,6,22)]
 abs_t = read.csv(paste0(data_folder,"basic_abs_test.csv"))
 dftest = rassembler_feat_freq(train = FALSE)
@@ -112,13 +112,10 @@ write.csv(ytest,file = paste0(data_folder,"ytest_freq_abs.csv"),row.names = FALS
 
 ### score actuel
 # decompo en 4 ondelettes calcul, filtre daubechies 20, 40 variables
-# calcul de ecart type et entropie de renyi dessus et sd et amplitudes relatives des 
-# ondes alpha, theta etc
-
-#### améliorations possibles:
-# enlever les valeurs aberrantes dans le df rassemblé : pas de grande amélioration
-# (ex: valeurs deux fois plus grandes que la moyenne)
-# tester PCA et k neirest neighbors?
+# calcul de ecart type et entropie de renyi sur ondelettes et sd 
+# amplitudes relatives des ondes alpha, theta etc après filtration
+# basic features : mean max min of absolute signal
+# RF
 
 # tester SVM : 
 
