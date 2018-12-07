@@ -24,26 +24,28 @@ source(paste0(file_folder,"fonctions.R"))
 source(paste0(file_folder,"features.R"))
 
 ## calcul des features
+calcul_feat_base2(xtrain)
+calcul_feat_base2(xtest, train = FALSE)
 
-calcul_feat_freq(xtrain)
-calcul_feat_freq(xtest, train = FALSE)
+# calcul_feat_freq(xtrain)
+# calcul_feat_freq(xtest, train = FALSE)
 
 # calcul_feat_alpha(xtrain)
 # calcul_feat_alpha(xtest, train = FALSE)
 
 ## création du modèle RF
 dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
-# dfw = rassembler_feat2()  ##ent RS et mmd sur vaguelettes
+df_abs = read.csv(paste0(data_folder,"basic_abs.csv"))
 # dff = rassembler_feat_prop()
 # dfa = rassembler_feat_alpha()
-sd_acc = read.csv(paste0(data_folder,"basic_feat.csv")) [,c(1,2,4,6,8,24)]
+# sd_acc = read.csv(paste0(data_folder,"basic_feat.csv")) [,c(1,2,4,6,8,24)]
 # 
 
 
 df = rassembler_feat_freq()
 df[is.na(df)] = 0 #setting NA values to zero
 df = merge(df,dfw, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
-df = merge(df,sd_acc, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+df = merge(df,df_abs, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 # df = merge(df,dff, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
 
@@ -78,36 +80,33 @@ imp_o = as.data.frame(f_RandomForest_o$importance[order(f_RandomForest_o$importa
 
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 170)))],ntree=700,mtry = 30)
+                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 200)))],ntree=700,mtry = 48)
 print(f_RandomForest2)
 
 f_RandomForest2_o = randomForest(sleep_stage~.,
-                               data=df_out[,c("sleep_stage",rownames(subset(imp_o,imp_o[,1] > 170)))],ntree=700,mtry = 30)
+                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 150)))],ntree=700,mtry = 30)
 print(f_RandomForest2_o)
 
 
-f_RandomForest3 = randomForest(sleep_stage~.,
-                               data=df_out[,c("sleep_stage",rownames(subset(imp,imp[,1] > 300)))],ntree=700,mtry = 24)
-print(f_RandomForest3)
 
 #prediction
-dft = rassembler_feat(train = FALSE)
+dft = rassembler_feat(train = FALSE) ##ent R et sd sur vaguelettes
 # dfts = rassembler_feat_alpha(train = FALSE)
-sd_acc_t = read.csv(paste0(data_folder,"basic_feat_test.csv"))[,c(2,4,6,22)]
-# dfft = rassembler_feat_prop(train = FALSE)
+#sd_acc_t = read.csv(paste0(data_folder,"basic_feat_test.csv"))[,c(2,4,6,22)]
+abs_t = read.csv(paste0(data_folder,"basic_abs_test.csv"))
 dftest = rassembler_feat_freq(train = FALSE)
 dftest[is.na(dftest)] = 0 #setting NA values to zero
 
 dftest = cbind(dftest,dft)
-dftest = cbind(dftest,sd_acc_t)
+dftest = cbind(dftest,abs_t)
 
 
 
-ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(subset(imp,imp[,1] > 170))]))
+ytest = as.data.frame(predict(f_RandomForest2_o,dftest[,rownames(subset(imp,imp[,1] > 150))]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 
-write.csv(ytest,file = paste0(data_folder,"ytest_freq_feat2.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_freq_abs.csv"),row.names = FALSE)
 #write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)
 
 
