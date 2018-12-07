@@ -37,6 +37,16 @@ abs_deviation = function(x)
   return (res/length(x))
 }
 
+val_absolue = function(x)
+{
+  abx = abs(as.numeric(x))
+  ma = mean(abx)
+  max = max(abx)
+  min = min(abx)
+  
+  return( c(ma,max,min))
+}
+
 #feature : MMD (max min distance <=> amplitude)
 MMD = function(x){
   x = as.numeric(x)

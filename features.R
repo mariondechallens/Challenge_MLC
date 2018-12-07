@@ -87,31 +87,35 @@ calcul_feat_freq = function(x,train = TRUE) #x = xtrain ou xtest
   rm(data)
 }
 
-calcul_feat_entropie = function(x,train = TRUE) # sur accélerometre et pulsometre
+calcul_feat_base2 = function(x,train = TRUE) # sur accélerometre et pulsometre
 {
   if (train)
     df = ytrain
   else
     df = yrandom
-  j = 3
-  for (i in c(1,2,3,11))
+  for (i in 1:11)
   {
     print(i)
     data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
-    df[,j] = apply(data,1,entropie_Renyi_acc)
-    j = j+1
+    s = apply(data,1,val_absolue)
+    dfs = as.data.frame(t(s))
+    colnames(dfs) = c(paste0("mean_abs_",list.datasets(xtrain, recursive = TRUE)[i]),
+                      paste0("max_abs_",list.datasets(xtrain, recursive = TRUE)[i]),
+                      paste0("min_abs_",list.datasets(xtrain, recursive = TRUE)[i]))
+    df = cbind(df,dfs)
+
   }
     rm(data)
-    colnames(df)[3:ncol(df)] = c("accx_ent","accy_ent","accz_ent","oxy_ent")
-    
+    rm(dfs)
   if (train)
     {
-      #write.csv(df,file = paste0(data_folder,"entropie_Renyi_acc_oxy.csv"),row.names = FALSE)
-      write.csv(df,file = paste0("entropie_Renyi_acc_oxy.csv"),row.names = FALSE)    
+      write.csv(df,file = paste0(data_folder,"basic_abs.csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("entropie_Renyi_acc_oxy.csv"),row.names = FALSE)    
     }
   else
-    #write.csv(df,file = paste0(data_folder,"entropie_Renyi_acc_oxy_test.csv"),row.names = FALSE)
-    write.csv(df,file = paste0("entropie_Renyi_acc_oxy_test.csv"),row.names = FALSE)
+    df = df[,3:ncol(df)]
+    write.csv(df,file = paste0(data_folder,"basic_abs_test.csv"),row.names = FALSE)
+    #write.csv(df,file = paste0("entropie_Renyi_acc_oxy_test.csv"),row.names = FALSE)
     
 }
 
