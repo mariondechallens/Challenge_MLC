@@ -66,21 +66,17 @@ row_sub = apply(df_out[,3:ncol(df_out)], 1, function(row) all(row !=0 ))
 df_out = df_out[row_sub,]
 
 
-f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 64)
+f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 86)
 print(f_RandomForest)
 
-f_RandomForest_o = randomForest(sleep_stage~.,data=df_out[,2:ncol(df_out)],mtry = 64)
-print(f_RandomForest_o)
 
 #Variables d'importance 
 imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
                                                     decreasing = TRUE), ])
-imp_o = as.data.frame(f_RandomForest_o$importance[order(f_RandomForest_o$importance[, 1], 
-                                                    decreasing = TRUE), ])
 
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 200)))],ntree=700,mtry = 48)
+                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 100)))],ntree=700,mtry = 48)
 print(f_RandomForest2)
 
 f_RandomForest2_o = randomForest(sleep_stage~.,
@@ -99,14 +95,15 @@ dftest[is.na(dftest)] = 0 #setting NA values to zero
 
 dftest = cbind(dftest,dft)
 dftest = cbind(dftest,abs_t)
+dftest = cbind(dftest,df_alp)
 
 
 
-ytest = as.data.frame(predict(f_RandomForest2_o,dftest[,rownames(subset(imp,imp[,1] > 150))]))
+ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(subset(imp,imp[,1] > 100))]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 
-write.csv(ytest,file = paste0(data_folder,"ytest_freq_abs.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_freq_abs_alp.csv"),row.names = FALSE)
 #write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)
 
 
