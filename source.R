@@ -111,6 +111,7 @@ write.csv(ytest,file = paste0(data_folder,"ytest_freq_abs_alp.csv"),row.names = 
 # decompo en 4 ondelettes calcul, filtre daubechies 20, 40 variables
 # calcul de ecart type et entropie de renyi sur ondelettes et sd 
 # amplitudes relatives des ondes alpha, theta etc après filtration
+# features sur ondes alpha seulement
 # basic features : mean max min of absolute signal
 # RF
 
