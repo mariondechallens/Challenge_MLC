@@ -34,7 +34,8 @@ calcul_feat_wavelets_bis(xtest,train = FALSE)
 # calcul_feat_alpha(xtest, train = FALSE)
 
 ## création du modèle RF
-dfw = rassembler_feat()  ##ent R et sd sur vaguelettes
+dfw = rassembler_feat()  ##ent Ren et sd sur vaguelettes
+#dfw = rassembler_feat_wave3()  ##ent Renyi et mean abs sur vaguelettes apres filtrage 0 30
 df_abs = read.csv(paste0(data_folder,"basic_abs.csv"))
 # dff = rassembler_feat_prop()
 dfa = rassembler_feat_alpha()
@@ -49,7 +50,7 @@ df = merge(df,df_abs, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
 
-## removing outliers
+######## removing outliers ?
 df_out = df
 # removing data when amplitude of subbands is two times larger than amp of the whole
 for (i in 1:7)
@@ -64,7 +65,7 @@ for (i in 1:7)
 # removing zero values
 row_sub = apply(df_out[,3:ncol(df_out)], 1, function(row) all(row !=0 )) 
 df_out = df_out[row_sub,]
-
+########
 
 f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 86)
 print(f_RandomForest)
@@ -76,7 +77,7 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
 
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 100)))],ntree=700,mtry = 48)
+                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 200)))],ntree=700,mtry = 48)
 print(f_RandomForest2)
 
 f_RandomForest2_o = randomForest(sleep_stage~.,
@@ -87,6 +88,7 @@ print(f_RandomForest2_o)
 
 #prediction
 dft = rassembler_feat(train = FALSE) ##ent R et sd sur vaguelettes
+#dft = rassembler_feat_wave3(train = FALSE)  ##ent R et mean abs sur vaguelettes apres filtrage 0 30
 df_alp = rassembler_feat_alpha(train = FALSE)
 #sd_acc_t = read.csv(paste0(data_folder,"basic_feat_test.csv"))[,c(2,4,6,22)]
 abs_t = read.csv(paste0(data_folder,"basic_abs_test.csv"))
@@ -99,11 +101,11 @@ dftest = cbind(dftest,df_alp)
 
 
 
-ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(subset(imp,imp[,1] > 100))]))
+ytest = as.data.frame(predict(f_RandomForest2_o,dftest[,rownames(subset(imp,imp[,1] > 100))]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 
-write.csv(ytest,file = paste0(data_folder,"ytest_freq_abs_alp.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_freq_wave_alp.csv"),row.names = FALSE)
 #write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)
 
 
