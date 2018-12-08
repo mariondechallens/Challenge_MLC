@@ -115,19 +115,40 @@ wavelet_coeff4 = function(x)
   d = dwt(as.numeric(x),n.levels = 4,filter = "d20")
   
   wave1_ent = sh(spec(nonvide(d@W$W1),f=50,plot = FALSE), alpha =0.5)
-  wave1_mmd = MMD(nonvide(d@W$W1))
+  wave1_sd = sd(nonvide(d@W$W1))
   
   wave2_ent = sh(spec(nonvide(d@W$W2),f=50,plot = FALSE), alpha =0.5)
-  wave2_mmd = MMD(nonvide(d@W$W2))
+  wave2_sd = sd(nonvide(d@W$W2))
   
   wave3_ent = sh(spec(nonvide(d@W$W3),f=50,plot = FALSE), alpha =0.5)
-  wave3_mmd = MMD(nonvide(d@W$W3))
+  wave3_sd = sd(nonvide(d@W$W3))
   
   wave4_ent = sh(spec(nonvide(d@W$W4),f=50,plot = FALSE), alpha =0.5)
-  wave4_mmd = MMD(nonvide(d@W$W4))
+  wave4_sd = sd(nonvide(d@W$W4))
   
-  return(c(wave1_ent,wave1_mmd,wave2_ent,wave2_mmd,wave3_ent,
-           wave3_mmd,wave4_ent,wave4_mmd))
+  return(c(wave1_ent,wave1_sd,wave2_ent,wave2_sd,wave3_ent,
+           wave3_sd,wave4_ent,wave4_sd))
+}
+
+wavelet_coeff4_bis = function(x)
+{
+  x = ffilter(as.numeric(x),f=50,from = 0, to = 30)
+  d = dwt(as.numeric(x),n.levels = 4,filter = "d20")
+  
+  wave1_ent = sh(spec(nonvide(d@W$W1),f=50,plot = FALSE), alpha =0.5)
+  wave1_mean = mean(abs(nonvide(d@W$W1)))
+  
+  wave2_ent = sh(spec(nonvide(d@W$W2),f=50,plot = FALSE), alpha =0.5)
+  wave2_mean = mean(abs(nonvide(d@W$W2)))
+  
+  wave3_ent = sh(spec(nonvide(d@W$W3),f=50,plot = FALSE), alpha =0.5)
+  wave3_mean = mean(abs(nonvide(d@W$W3)))
+  
+  wave4_ent = sh(spec(nonvide(d@W$W4),f=50,plot = FALSE), alpha =0.5)
+  wave4_mean = mean(abs(nonvide(d@W$W4)))
+  
+  return(c(wave1_ent,wave1_mean,wave2_ent,wave2_mean,wave3_ent,
+           wave3_mean,wave4_ent,wave4_mean))
 }
 
 ### proportions des frequences alpha etc pour EEG

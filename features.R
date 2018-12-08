@@ -34,6 +34,40 @@ calcul_feat_wavelets = function(x,train = TRUE) #x = xtrain ou xtest
   rm(data)
 }
 
+calcul_feat_wavelets_bis = function(x,train = TRUE) #x = xtrain ou xtest
+{
+  for (i in c(4:10))
+  {
+    print(i)
+    data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
+    s = apply(data,1,wavelet_coeff4)
+    df = as.data.frame(t(s))
+    colnames(df) = c(paste0("wave1_ent_eeg",i-3),
+                     paste0("wave1_mean_eeg",i-3),
+                     paste0("wave2_ent_eeg",i-3),
+                     paste0("wave2_mean_eeg",i-3),
+                     paste0("wave3_ent_eeg",i-3),
+                     paste0("wave3_mean_eeg",i-3),
+                     paste0("wave4_ent_eeg",i-3),
+                     paste0("wave4_mean_eeg",i-3))
+    
+    
+    if (train)
+    {
+      df =cbind(ytrain,df)
+      write.csv(df,file = paste0(data_folder,"wavelets_ent_mean_eeg",i-3,".csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("wavelets_coeff_RS_mean_eeg",i-3,".csv"),row.names = FALSE)
+      
+    }
+    else
+      write.csv(df,file = paste0(data_folder,"wavelets_ent_mean_egg",i-3,"_test.csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("wavelets_coeff_RS_mean_egg",i-3,"_test.csv"),row.names = FALSE)
+    
+    
+  }
+  rm(data)
+}
+
 calcul_feat_freq_prop = function(x,train = TRUE) #x = xtrain ou xtest
 {
   for (i in 4:10)
@@ -197,6 +231,36 @@ rassembler_feat2 = function(train = TRUE)
     {
       #data = read.csv(paste0(data_folder,"wavelets_coeff_RS_mmd_egg",i,"_test.csv"))
       data = read.csv(paste0("wavelets_coeff_RS_mmd_egg",i,"_test.csv"))
+      df =cbind(df,data)
+    }
+  }
+  rm(data)
+  return(df)
+}
+
+rassembler_feat_wave3 = function(train = TRUE)
+{
+  if (train)
+  {
+    df = read.csv(paste0(data_folder,"wavelets_ent_mean_eeg1.csv"))
+    #df = read.csv(paste0("wavelets_coeff_RS_mmd_eeg1.csv"))
+    for (i in 2:7) 
+    {
+      data = read.csv(paste0(data_folder,"wavelets_ent_mean_eeg",i,".csv"))
+      #data = read.csv(paste0("wavelets_coeff_RS_mmd_eeg",i,".csv"))
+      df = merge(df,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+    }
+    df$sleep_stage = as.factor(df$sleep_stage)
+  }
+  
+  else
+  {
+    df = read.csv(paste0(data_folder,"wavelets_ent_mean_egg1_test.csv"))
+    #df = read.csv(paste0("wavelets_coeff_RS_mmd_egg1_test.csv"))
+    for (i in 2:7) 
+    {
+      data = read.csv(paste0(data_folder,"wavelets_ent_mean_egg",i,"_test.csv"))
+      #data = read.csv(paste0("wavelets_coeff_RS_mmd_egg",i,"_test.csv"))
       df =cbind(df,data)
     }
   }

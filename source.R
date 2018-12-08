@@ -24,11 +24,11 @@ source(paste0(file_folder,"fonctions.R"))
 source(paste0(file_folder,"features.R"))
 
 ## calcul des features
-calcul_feat_base2(xtrain)
-calcul_feat_base2(xtest, train = FALSE)
+# calcul_feat_base2(xtrain)
+# calcul_feat_base2(xtest, train = FALSE)
 
-# calcul_feat_freq(xtrain)
-# calcul_feat_freq(xtest, train = FALSE)
+calcul_feat_wavelets_bis(xtrain)
+calcul_feat_wavelets_bis(xtest,train = FALSE)
 
 # calcul_feat_alpha(xtrain)
 # calcul_feat_alpha(xtest, train = FALSE)
