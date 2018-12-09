@@ -13,17 +13,17 @@ Ce challenge est réalisé en partenariat avec l'entreprise Dreem qui est une star
 ### Contexte du challenge
 
 Ce challenge consiste à réaliser de la classification en stades de sommeil. Une nuit voit défiler plusieurs cycles de sommeil qui se composent tous d'une phase : 
-+ d'éveil
-+ de sommeil léger
-+ de sommeil profond 
-+ de sommeil paradoxal. 
+  * d'éveil
+  * de sommeil léger
+  * de sommeil profond 
+  * de sommeil paradoxal. 
 
 Un moyen de mesurer le sommeil est d'utiliser le polysomnographe qui relève notamment l'activité du cerveau, le mouvement des yeux et la tension musculaire afin d'évaluer la qualité du sommeil d'une personne.
 
 Dans cette optique de mesure, la société Dreem a développé un bandeau qui fonctionne comme le polysomnographe et qui permet de mesurer trois types de signaux: 
-+ l'activité électrique du cerveau grâce à un électro-encéphalogramme (EEG)
-+ le mouvement la position, la respiration grâce à un acceléromètre
-+ les battements sanguins grâce à un oxymètre de pouls.
+  * l'activité électrique du cerveau grâce à un électro-encéphalogramme (EEG)
+  * le mouvement la position, la respiration grâce à un acceléromètre
+  * les battements sanguins grâce à un oxymètre de pouls.
 
 ### Le challenge
 
@@ -65,9 +65,31 @@ plot(1:ncol(eeg1), eeg1[1, ], type = 'l', ylab = "Amplitude en uV", xlab = "30 s
 
 
 ## 3. Extraction de features
+
+Afin de construire un modèle de classification des données en stade de sommeil, nous avons extrait des signaux un certain nombre de features. Nous les avons ensuite testés en appliquant l'algorithme de classification présenté dans la section suivante afin de déterminer l'importance de leur influence sur la détermination du stade de sommeil.
+
+Nous avons utilisé pour différentes approches pour le choix des features à extraire.
+
 ## 4. Modèle utilisé - Description théorique
+
+Nos tests sur les features nous ont permis de relever les plus influents et de sélectionner ceux de notre modèle final.
+
+Nous utilisons l'algorithme de Random Forest pour la classification.
+
+Théorie : voir notes du dernier cours (Gradient boosting)
+
 ## 5. Protocole de validation croisée
+
+La validation croisée est réalisée par l'algorithme de Random Forest décrit plus haut.
+
+
 ## 6. Présentation des résultats
+
+Choix du nombre d'arbres
+
+Choix du nombre de variables tirées aléatoirement avec remise à chaque étape de l'algorithme
+
+Matrice de transition finale sur le training set avec la validation croisée réalisée
 
 
 
