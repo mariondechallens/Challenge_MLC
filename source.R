@@ -41,7 +41,13 @@ dfp = rassembler_feat_prop()
 dfa = rassembler_feat_alpha()
 # sd_acc = read.csv(paste0(data_folder,"basic_feat.csv")) [,c(1,2,4,6,8,24)]
 # 
-
+dfC = ytrain
+for (i in 1:7)
+{
+  dfC[,c(paste0("alpha_amp_relC",i),paste0("beta_amp_relC",i),
+        paste0("theta_amp_relC",i),paste0("delta_amp_relC",i))] = df[,c(paste0("alpha_amp_rel",i),paste0("beta_amp_rel",i),
+                                                                      paste0("theta_amp_rel",i),paste0("delta_amp_rel",i))]^2
+}
 
 df = rassembler_feat_freq()
 df[is.na(df)] = 0 #setting NA values to zero
@@ -49,6 +55,7 @@ df = merge(df,dfw, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,df_abs, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,dfp, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+df = merge(df,dfC, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
 ######## removing outliers ?
 df_out = df
@@ -67,7 +74,7 @@ row_sub = apply(df_out[,3:ncol(df_out)], 1, function(row) all(row !=0 ))
 df_out = df_out[row_sub,]
 ########
 
-f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 108)
+f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 128)
 print(f_RandomForest)
 
 
@@ -113,7 +120,7 @@ write.csv(ytest,file = paste0(data_folder,"ytest_freq_wave_alp_prop.csv"),row.na
 
 ### score actuel
 # decompo en 4 ondelettes calcul, filtre daubechies 20, 40 variables
-# calcul de ecart type et entropie de renyi sur ondelettes et sd 
+# calcul de ecart type et entropie de renyi sur ondelettes 
 # amplitudes relatives des ondes alpha, theta etc après filtration
 # features sur ondes alpha seulement
 # proportions des ondes alpha etc
