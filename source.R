@@ -82,9 +82,11 @@ print(f_RandomForest)
 imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
                                                     decreasing = TRUE), ])
 
+write.csv(imp,file = paste0(data_folder,"imp.csv"),row.names = TRUE)
+
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 200)))],ntree=700,mtry = 48)
+                               data=df2[,2:ncol(df2)],ntree=700,mtry = 48)
 print(f_RandomForest2)
 
 f_RandomForest2_o = randomForest(sleep_stage~.,
@@ -126,6 +128,8 @@ write.csv(ytest,file = paste0(data_folder,"ytest_freq_wave_alp_prop.csv"),row.na
 # proportions des ondes alpha etc
 # basic features : mean max min of absolute signal
 # RF
+
+## tester les combinaisons et puissances sur les dernieres features selectionnées
 
 # tester SVM : 
 

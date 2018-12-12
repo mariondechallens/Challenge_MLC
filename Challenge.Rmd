@@ -13,14 +13,16 @@ Ce challenge est réalisé en partenariat avec l'entreprise Dreem qui est une star
 ### Contexte du challenge
 
 Ce challenge consiste à réaliser de la classification en stades de sommeil. Une nuit voit défiler plusieurs cycles de sommeil qui se composent tous d'une phase : 
-  * d'éveil
-  * de sommeil léger
-  * de sommeil profond 
-  * de sommeil paradoxal. 
+
+* d'éveil
+* de sommeil léger
+* de sommeil profond 
+* de sommeil paradoxal. 
 
 Un moyen de mesurer le sommeil est d'utiliser le polysomnographe qui relève notamment l'activité du cerveau, le mouvement des yeux et la tension musculaire afin d'évaluer la qualité du sommeil d'une personne.
 
 Dans cette optique de mesure, la société Dreem a développé un bandeau qui fonctionne comme le polysomnographe et qui permet de mesurer trois types de signaux: 
+
   * l'activité électrique du cerveau grâce à un électro-encéphalogramme (EEG)
   * le mouvement la position, la respiration grâce à un acceléromètre
   * les battements sanguins grâce à un oxymètre de pouls.
