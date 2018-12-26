@@ -35,27 +35,18 @@ calcul_feat_wavelets_bis(xtest,train = FALSE)
 
 ## création du modèle RF
 dfw = rassembler_feat()  ##ent Ren et sd sur vaguelettes
-#dfw = rassembler_feat_wave3()  ##ent Renyi et mean abs sur vaguelettes apres filtrage 0 30
-df_abs = read.csv(paste0(data_folder,"basic_abs.csv"))
-dfp = rassembler_feat_prop()
-dfa = rassembler_feat_alpha()
-# sd_acc = read.csv(paste0(data_folder,"basic_feat.csv")) [,c(1,2,4,6,8,24)]
-# 
-dfC = ytrain
-for (i in 1:7)
-{
-  dfC[,c(paste0("alpha_amp_relC",i),paste0("beta_amp_relC",i),
-        paste0("theta_amp_relC",i),paste0("delta_amp_relC",i))] = df[,c(paste0("alpha_amp_rel",i),paste0("beta_amp_rel",i),
-                                                                      paste0("theta_amp_rel",i),paste0("delta_amp_rel",i))]^2
-}
+df_abs = read.csv(paste0(data_folder,"basic_abs.csv")) #basic features absolute
+dfp = rassembler_feat_prop()  #proportions
+dfa = rassembler_feat_alpha() # ondes alpha
+df = rassembler_feat_freq()  # features sur frequences alpha theta etc
 
-df = rassembler_feat_freq()
+
+
 df[is.na(df)] = 0 #setting NA values to zero
 df = merge(df,dfw, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,df_abs, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,dfp, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
-df = merge(df,dfC, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
 ######## removing outliers ?
 df_out = df
@@ -85,13 +76,10 @@ imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 
 write.csv(imp,file = paste0(data_folder,"imp.csv"),row.names = TRUE)
 
 #better model ?
-f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df2[,2:ncol(df2)],ntree=700,mtry = 48)
-print(f_RandomForest2)
 
-f_RandomForest2_o = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 100)))],ntree=700,mtry = 48)
-print(f_RandomForest2_o)
+f_RandomForest2 = randomForest(sleep_stage~.,
+                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 150)))],ntree=700,mtry = 48)
+print(f_RandomForest2)
 
 
 
@@ -112,21 +100,21 @@ dftest = cbind(dftest,dftp)
 
 
 
-ytest = as.data.frame(predict(f_RandomForest2_o,dftest[,rownames(subset(imp,imp[,1] > 100))]))
+ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(subset(imp,imp[,1] > 100))]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 
-write.csv(ytest,file = paste0(data_folder,"ytest_freq_wave_alp_prop.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_final.csv"),row.names = FALSE)
 #write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)
 
 
 ### score actuel
-# decompo en 4 ondelettes calcul, filtre daubechies 20, 40 variables
-# calcul de ecart type et entropie de renyi sur ondelettes 
-# amplitudes relatives des ondes alpha, theta etc après filtration
-# features sur ondes alpha seulement
-# proportions des ondes alpha etc
-# basic features : mean max min of absolute signal
+# 1.decompo en 4 ondelettes calcul, filtre daubechies 20, 40 variables
+#  et calcul de ecart type et entropie de renyi sur ondelettes 
+# 2. amplitudes relatives des ondes alpha, theta etc après filtration
+# 3. features sur ondes alpha seulement
+# 4. proportions des ondes alpha etc
+# 5. basic features : mean max min of absolute signal
 # RF
 
 ## tester les combinaisons et puissances sur les dernieres features selectionnées
