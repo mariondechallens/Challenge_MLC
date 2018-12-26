@@ -68,7 +68,7 @@ f_RandomForest2 = randomForest(sleep_stage~.,
                                data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 100)))],ntree=700,mtry = 48)
 print(f_RandomForest2)
 
-
+##bcp de variables...
 
 #prediction
 dft = rassembler_feat(train = FALSE) ##ent Renyi et sd sur vaguelettes
@@ -88,5 +88,5 @@ ytest = as.data.frame(predict(f_RandomForest2_o,dftest[,rownames(subset(imp,imp[
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 
-write.csv(ytest,file = paste0(data_folder,"ytest_freq_wave_alp_prop.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_final.csv"),row.names = FALSE)
 #write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)

@@ -78,7 +78,7 @@ write.csv(imp,file = paste0(data_folder,"imp.csv"),row.names = TRUE)
 #better model ?
 
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 150)))],ntree=700,mtry = 48)
+                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 100)))],ntree=700,mtry = 48)
 print(f_RandomForest2)
 
 
@@ -100,7 +100,7 @@ dftest = cbind(dftest,dftp)
 
 
 
-ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(subset(imp,imp[,1] > 100))]))
+ytest = as.data.frame(predict(f_RandomForest2,dftest[,rownames(subset(imp,imp[,1] > 150))]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 
