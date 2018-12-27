@@ -20,8 +20,8 @@ xtest = h5file(name = paste0(data_folder,"test.h5/test.h5"))
 
 
 ## fichiers à charger
-source(paste0(file_folder,"fonctions.R"))
-source(paste0(file_folder,"features.R"))
+source(paste0(file_folder,"fonctions_final.R"))
+source(paste0(file_folder,"features_final.R"))
 
 ## calcul des features et enregistrement des dataframes
 calcul_feat_base2(xtrain)
@@ -54,18 +54,21 @@ df = merge(df,df_abs, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,dfp, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
-f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 128)
-print(f_RandomForest)
+# f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 128)
+# print(f_RandomForest)
 
 #Variables d'importance 
-imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
-                                                    decreasing = TRUE), ])
+# imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1], 
+#                                                     decreasing = TRUE), ])
+# write.csv(imp,file = paste0(data_folder,"imp.csv"),row.names = TRUE)
 
-write.csv(imp,file = paste0(data_folder,"imp.csv"),row.names = TRUE)
+imp = read.csv(paste0(data_folder,"imp.csv"))
+imp[,1] = as.character(imp[,1])
+
 
 #better model ?
 f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",rownames(subset(imp,imp[,1] > 100)))],ntree=700,mtry = 48)
+                               data=df[,c("sleep_stage",subset(imp,imp[,2] > 150)[,1])],ntree=700,mtry = 48)
 print(f_RandomForest2)
 
 ##bcp de variables...
@@ -84,7 +87,7 @@ dftest = cbind(dftest,df_alp)
 dftest = cbind(dftest,dftp)
 
 
-ytest = as.data.frame(predict(f_RandomForest2_o,dftest[,rownames(subset(imp,imp[,1] > 100))]))
+ytest = as.data.frame(predict(f_RandomForest2,dftest[,subset(imp,imp[,2] > 150)[,1]]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 
