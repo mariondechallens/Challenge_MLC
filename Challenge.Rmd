@@ -72,6 +72,22 @@ Afin de construire un modèle de classification des données en stade de sommeil, 
 
 Nous avons utilisé pour différentes approches pour le choix des features à extraire.
 
+Nous avons d'abord calculé des features basiques sur tous les signaux: l'écart-type et la moyenne du signal, la moyenne, le minimum et le maximum du signal en valeur absolue.
+
+Ensuite, en nous appuyant sur les ondes caractéristiques présentes dans les différents stades de sommeil nous avons réalisé deux types de décomposition des signaux EEG. En effet, on peut distinguer quatre types d'onde entre 0 et 30Hz:
+
+* les ondes alpha entre 8 et 13Hz
+* les ondes theta entre 4 et 8Hz
+* les ondes beta  entre 13 et 30Hz
+* les ondes delta entre 0.5 et 4Hz
+
+Chaque stade de sommeil étant caractérisé par certains types d'onde ci-dessus, nous avons filtré le signal de chacun des 7 enregistrements EEG entre 0 et 30Hz et decoupé en quatre plages correspondant aux ondes citées. Sur chacune des plages, nous avons calculé la moyenne, la somme des amplitudes en valeur absolue ainsi que le ratio de la somme des amplitudes en valeur absolue de la la plage sur celle du signal total filtré, que l'on peut appeler amplitude relative. Nous calculons également la somme des amplitudes au carré du signal total ainsi que les proportions de chacune des plages de fréquences dans le signal.
+
+Parallèlement à cette décomposition, nous réalisons une décomposition en quatre ondelettes des enregistrements EEG. Cette décomposition se fait après un filtre de Daubechies appliqué au signal. On obtient alors les coefficients de chacune des 4 ondelettes. Nous calculons ensuite l'écart-type et l'entropie de Renyi de chaque ondelette. L'entropie est une mesure de l'énergie du signal.
+
+Après ces premiers calculs de features, nous remarquons que le stade de sommeil le plus dur à classer est le stade 1. Ce dernier est caractérisé notamment par les ondes alpha, c'est pourquoi nous décidons de calculer des features supplémentaires uniquement surt la plage de fréquence alpha des signaux EEG. Nous calculons ainsi l'écart-type, l'entropie de Renyi et la min-max distance de cette plage. La min-max distance est la somme des distances entre les points maximum et minimal du signal découpé en n intervalles.
+
+
 ## 4. Modèle utilisé - Description théorique
 
 Nos tests sur les features nous ont permis de relever les plus influents et de sélectionner ceux de notre modèle final.
@@ -92,6 +108,8 @@ Choix du nombre d'arbres
 Choix du nombre de variables tirées aléatoirement avec remise à chaque étape de l'algorithme
 
 Matrice de transition finale sur le training set avec la validation croisée réalisée
+
+## 7. Bibliographie
 
 
 

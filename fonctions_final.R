@@ -46,7 +46,7 @@ nonvide = function(x){
 }
 
 
-### decomposition en 4 ondelettes et filtre Daubechies 20, calcule mmd et entro
+### decomposition en 4 ondelettes et filtre Daubechies 20, calcule sd et entro
 wavelet_coeff4 = function(x)
 {
   d = dwt(as.numeric(x),n.levels = 4,filter = "d20")
