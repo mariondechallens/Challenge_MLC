@@ -72,7 +72,54 @@ Afin de construire un modèle de classification des données en stade de sommeil, 
 
 Nous avons utilisé pour différentes approches pour le choix des features à extraire, suite à des recherches bibliographiques dont les sources sont citées plus bas.
 
-Nous avons d'abord calculé des features basiques sur tous les signaux: l'écart-type et la moyenne du signal, la moyenne, le minimum et le maximum du signal en valeur absolue.
+Nous avons d'abord calculé des features basiques sur tous les signaux: l'écart-type et la moyenne du signal, la moyenne, le minimum et le maximum du signal en valeur absolue. Nous utilisons les deux fonctions suivantes pour calculer les quantités sur le signal en valeur absolue et enregistrer les données ainsi calculées.
+
+```{r basic_feat, echo = FALSE}
+val_absolue = function(x)
+{
+  abx = abs(as.numeric(x))
+  ma = mean(abx)
+  max = max(abx)
+  min = min(abx)
+  
+  return( c(ma,max,min))
+
+}
+print("Fonction val_absolue")
+print(val_absolue)
+
+calcul_feat_base2 = function(x,train = TRUE)
+{
+  if (train)
+    df = ytrain
+  else
+    df = yrandom
+  for (i in 1:11)
+  {
+    print(i)
+    data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
+    s = apply(data,1,val_absolue)
+    dfs = as.data.frame(t(s))
+    colnames(dfs) = c(paste0("mean_abs_",list.datasets(xtrain, recursive = TRUE)[i]),
+                      paste0("max_abs_",list.datasets(xtrain, recursive = TRUE)[i]),
+                      paste0("min_abs_",list.datasets(xtrain, recursive = TRUE)[i]))
+    df = cbind(df,dfs)
+
+  }
+    rm(data)
+    rm(dfs)
+  if (train)
+    {
+      write.csv(df,file = paste0(data_folder,"basic_abs.csv"),row.names = FALSE)   
+    }
+  else
+    df = df[,3:ncol(df)]
+    write.csv(df,file = paste0(data_folder,"basic_abs_test.csv"),row.names = FALSE)
+    
+}
+print("Fonction calcul_feat_base2")
+print(calcul_feat_base2)
+```
 
 Ensuite, en nous appuyant sur les ondes caractéristiques présentes dans les différents stades de sommeil nous avons réalisé deux types de décomposition des signaux EEG. En effet, on peut distinguer quatre types d'onde entre 0 et 30Hz:
 
@@ -81,13 +128,232 @@ Ensuite, en nous appuyant sur les ondes caractéristiques présentes dans les diff
 * les ondes beta  entre 13 et 30Hz
 * les ondes delta entre 0.5 et 4Hz
 
-Chaque stade de sommeil étant caractérisé par certains types d'onde ci-dessus, nous avons filtré le signal de chacun des 7 enregistrements EEG entre 0 et 30Hz et decoupé en quatre plages correspondant aux ondes citées. Sur chacune des plages, nous avons calculé la moyenne, la somme des amplitudes en valeur absolue ainsi que le ratio de la somme des amplitudes en valeur absolue de la plage sur celle du signal total filtré, que l'on peut appeler amplitude relative. Nous calculons également la somme des amplitudes au carré du signal total ainsi que les proportions de chacune des plages de fréquences dans le signal.
+Chaque stade de sommeil étant caractérisé par certains types d'onde ci-dessus, nous avons filtré le signal de chacun des 7 enregistrements EEG entre 0 et 30Hz et decoupé en quatre plages correspondant aux ondes citées. Sur chacune des plages, nous avons calculé la moyenne, la somme des amplitudes en valeur absolue ainsi que le ratio de la somme des amplitudes en valeur absolue de la plage sur celle du signal total filtré, que l'on peut appeler amplitude relative. Nous calculons également la somme des amplitudes au carré du signal total ainsi que les proportions de chacune des plages de fréquences dans le signal. Les fonctions que nous utilisons pour calculer ces features sont les suivantes et font appel à la bibliothèque seewave:
 
-Parallèlement à cette décomposition, nous réalisons une décomposition en quatre ondelettes des enregistrements EEG. Cette décomposition se fait après un filtre de Daubechies appliqué au signal. On obtient alors les coefficients de chacune des 4 ondelettes. Nous calculons ensuite l'écart-type et l'entropie de Renyi de chaque ondelette. L'entropie est une mesure de l'énergie du signal, nous la calculons par une fonction de la bibliothèque seewave de R avec un coefficient de 0.5. 
+```{r freq, echo = FALSE}
+library(seewave)
+### proportions des frequences alpha, theta, beta, delta pour EEG
+freq_prop = function(x)
+{
+  x_filtered = ffilter(as.numeric(x),f=50,from = 0, to = 30)
+  pic = as.data.frame(fpeaks(seewave::spec(as.numeric(x_filtered),f = 50,plot = FALSE),plot = FALSE))
+  pic$freq = pic$freq*1000
+  n =  nrow(pic)
+  #alpha waves
+  f_alpha =  subset(pic,pic$freq >= 8 & pic$freq <= 13)
+  alpha = nrow(f_alpha)/n
+  
+  #theta waves
+  f_theta =  subset(pic,pic$freq >= 4 & pic$freq <= 8)
+  theta = nrow(f_theta)/n
+  
+  #delta waves
+  f_delta =  subset(pic,pic$freq >= 0.5 & pic$freq <= 4)
+  delta = nrow(f_delta)/n
+  
+  #beta waves
+  f_beta =  subset(pic,pic$freq >= 13 & pic$freq <= 30)
+  beta = nrow(f_beta)/n
+  
+  return(c(alpha,beta,delta,theta))
+}
+print("Fonction freq_prop: proportions des frequences alpha, theta, beta, delta pour EEG")
+print(freq_prop)
 
-Après ces premiers calculs de features, nous remarquons que le stade de sommeil le plus dur à classer est le stade 1. Ce dernier est caractérisé notamment par les ondes alpha, c'est pourquoi nous décidons de calculer des features supplémentaires uniquement surt la plage de fréquence alpha des signaux EEG. Nous calculons ainsi l'écart-type, l'entropie de Renyi et la min-max distance de cette plage. La min-max distance est la somme des distances entre les points maximum et minimal du signal découpé en n intervalles.
+### features des frequences alpha, theta, beta, delta pour EEG
+freq_feat = function(x)
+{
+  x_filtered = ffilter(as.numeric(x),f=50,from = 0, to = 30)
+  pic = as.data.frame(fpeaks(seewave::spec(as.numeric(x_filtered),f = 50,plot = FALSE),plot = FALSE))
+  pic$freq = pic$freq*1000
+  #all 
+  amp = sum(abs(pic$amp))
+  amp2 = sum(pic$amp^2)
+  m = mean(pic$freq)
+  s = sd(pic$freq)
+  
+  #alpha waves
+  f_alpha =  subset(pic,pic$freq >= 8 & pic$freq <= 13)
+  alpha_amp = sum(abs(f_alpha$amp) )
+  alpha_amp_rel = alpha_amp/amp
+  alpha_m = mean(f_alpha$freq)
+  
+  #theta waves
+  f_theta =  subset(pic,pic$freq >= 4 & pic$freq <= 8)
+  theta_amp = sum(abs(f_theta$amp) ) 
+  theta_amp_rel = theta_amp/amp
+  theta_m = mean(f_theta$freq)
+  
+  #delta waves
+  f_delta =  subset(pic,pic$freq >= 0.5 & pic$freq <= 4)
+  delta_amp = sum(abs(f_delta$amp) )
+  delta_amp_rel = delta_amp/amp
+  delta_m = mean(f_delta$freq)
+  
+  #beta waves
+  f_beta =  subset(pic,pic$freq >= 13 & pic$freq <= 30)
+  beta_amp = sum(abs(f_beta$amp) )
+  beta_amp_rel = beta_amp/amp
+  beta_m = mean(f_beta$freq)
+  
+  return(c(amp,amp2,m,s,
+           alpha_amp,alpha_amp_rel,alpha_m,
+           theta_amp,theta_amp_rel,theta_m,
+           delta_amp,delta_amp_rel,delta_m,
+           beta_amp,beta_amp_rel,beta_m))
+           
+           
+}
+print("Fonction freq_feat: features des frequences alpha, theta, beta, delta pour EEG")
+print(freq_feat)
+
+```
 
 
+Parallèlement à cette décomposition, nous réalisons une décomposition en quatre ondelettes des enregistrements EEG. Cette décomposition se fait après un filtre de Daubechies appliqué au signal. On obtient alors les coefficients de chacune des 4 ondelettes. Nous calculons ensuite l'écart-type et l'entropie de Renyi de chaque ondelette. L'entropie est une mesure de l'énergie du signal, nous la calculons par une fonction de la bibliothèque seewave de R avec un coefficient de 0.5. Les calculs se font comme ceci grâce à la bibliothèque wavelets:
+
+```{r wave, echo = FALSE}
+library(wavelets)
+wavelet_coeff4 = function(x)
+{
+  d = dwt(as.numeric(x),n.levels = 4,filter = "d20")
+  
+  wave1_ent = sh(spec(nonvide(d@W$W1),f=50,plot = FALSE), alpha =0.5)
+  wave1_sd = sd(nonvide(d@W$W1))
+  
+  wave2_ent = sh(spec(nonvide(d@W$W2),f=50,plot = FALSE), alpha =0.5)
+  wave2_sd = sd(nonvide(d@W$W2))
+  
+  wave3_ent = sh(spec(nonvide(d@W$W3),f=50,plot = FALSE), alpha =0.5)
+  wave3_sd = sd(nonvide(d@W$W3))
+  
+  wave4_ent = sh(spec(nonvide(d@W$W4),f=50,plot = FALSE), alpha =0.5)
+  wave4_sd = sd(nonvide(d@W$W4))
+  
+  return(c(wave1_ent,wave1_sd,wave2_ent,wave2_sd,wave3_ent,
+           wave3_sd,wave4_ent,wave4_sd))
+}
+print("Fonction wavelets_coeff4: features sur les ondelettes pour EEG")
+print(wavelet_coeff4)
+
+```
+
+
+Après ces premiers calculs de features, nous remarquons que le stade de sommeil qui semble le plus difficile à classer est le stade 1. Ce dernier est caractérisé notamment par les ondes alpha, c'est pourquoi nous décidons de calculer des features supplémentaires uniquement sur la plage de fréquence alpha des signaux EEG. Nous calculons ainsi l'écart-type, l'entropie de Renyi et la min-max distance de cette plage. La min-max distance est la somme des distances entre les points maximum et minimal du signal découpé en n intervalles. Les fonctions sont les suivantes :
+```{r alpha, echo = FALSE}
+#feature : MMD (max min distance)
+MMD = function(x){
+  x = as.numeric(x)
+  if (length(x) > 100)
+    lambda = 100
+  if (length(x) > 10 && length(x) <= 100)
+    lambda = 10
+  
+  res = 0
+  n = length(x)/lambda
+  
+  if (n > 10)
+  {
+    for (i in 1:n)
+    {
+      x_i=x[(1 + (i-1)*lambda) : (i*lambda)]
+      My = max(x_i)
+      Mx = seq(along = x_i)[x_i== My]
+      my = min(x_i)
+      mx = seq(along = x_i)[x_i== my]
+      
+      res = res + sqrt((mx - Mx)^2 + (my - My)^2)
+    }
+  }
+  
+  return(res)
+}
+print("Fonction MMD: min_max distance")
+print(MMD)
+alpha = function(x)
+{
+  x_alpha = ffilter(as.numeric(x),f=50,from = 8, to = 13)
+  ent = sh(spec(nonvide(x_alpha),f=50,plot = FALSE), alpha =0.5)
+  mmd = MMD(nonvide(x_alpha))
+  sd = sd(nonvide(x_alpha))
+  return(c(ent,mmd,sd))
+}
+print("Fonction alpha: features sur frequences alpha pour EEG")
+print(alpha)
+```
+
+La fonction nonvide est introduite pour s'affranchir des listes vides éventuelles et les remplacer par une liste contenant un zéro:
+```{r nvide, echo=FALSE}
+nonvide = function(x){
+  if (length(x) == 0)
+    return(0)
+  else
+    return(x)
+}
+print(nonvide)
+```
+
+À chaque fois, nous calculons les features sur chaque enregistrement de EEG d'apprentissage et de test puis nous regroupons tous les dataframes en un seul au moment de la création du modèle. Ci-dessous un exemple pour les features sur les plages d'ondes alpha: 
+```{r feat, echo=FALSE}
+#calcul des features sur l'échantillon d'apprentissage ou de test
+calcul_feat_alpha = function(x,train = TRUE) #x = xtrain ou xtest
+{
+  for (i in 4:10)
+  {
+    print(i)
+    data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
+    s = apply(data,1,alpha)
+    df = as.data.frame(t(s))
+    colnames(df) = c(paste0("alpha_ent",i-3),
+                     paste0("alpha_mmd",i-3),
+                     paste0("alpha_sd",i-3))
+    
+    if (train)
+    {
+      df =cbind(ytrain,df)
+      write.csv(df,file = paste0(data_folder,"alpha_eeg",i-3,".csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("freq_prop_eeg",i-3,".csv"),row.names = FALSE)
+    }
+    else
+      write.csv(df,file = paste0(data_folder,"alpha_egg",i-3,"_test.csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("freq_prop_egg",i-3,"_test.csv"),row.names = FALSE)   
+  }
+  rm(data)
+}
+
+print("Fonction calcul_feat_alpha: calcul des features sur ondes alpha")
+print(calcul_feat_alpha)
+
+#regroupement des features en un seul dataframe
+rassembler_feat_alpha = function(train = TRUE)
+{
+  if (train)
+  {
+    df = read.csv(paste0(data_folder,"alpha_eeg1.csv"))
+    for (i in 2:7) 
+    {
+     data = read.csv(paste0(data_folder,"alpha_eeg",i,".csv"))
+      
+      df = merge(df,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+    }
+    df$sleep_stage = as.factor(df$sleep_stage)
+  }
+  
+  else
+  {
+    df = read.csv(paste0(data_folder,"alpha_egg1_test.csv"))
+    for (i in 2:7) 
+    {
+      data = read.csv(paste0(data_folder,"alpha_egg",i,"_test.csv"))
+      df =cbind(df,data)
+    }
+  }
+  rm(data)
+  return(df)
+}
+print("Fonction rassembler_feat_alpha: regrouper les features sur ondes alpha")
+print(rassembler_feat_alpha)
+```
 ## 4. Modèle utilisé - Description théorique
 
 Nous utilisons l'algorithme de Random Forest pour la classification. Il s'agit d'un algorithme d'agrégation de modèles (boosting) qui consiste à rassembler des modèles simples afin d'aboutir à un modèle final performant. L'algorithme de RandomForest consiste en effet à générer un certain nombre de modèles simples(arbres de décision). Chaque modèle est généré sur un échantillon bootstrap des données, c'est-à-dire que l'on pioche avec remise n individus parmi N pour construire l'échantillon. On choisit également aléatoirement un sous-ensemble de variables pour créer le modèle sur cet échantillon. Il y a ainsi deux niveaux d'aléatoire dans l'algorithme de RandomForest: au niveau des individus et des variables piochés pour chaque modèle simple.
@@ -104,14 +370,18 @@ La validation croisée est réalisée par l'algorithme de Random Forest lui-même. D
 
 ## 6. Présentation des résultats
 
-Choix du nombre d'arbres
+Choix du nombre d'arbres ??
 
-Choix du nombre de variables tirées aléatoirement avec remise à chaque étape de l'algorithme
+Choix du nombre de variables tirées aléatoirement avec remise à chaque étape de l'algorithme ??
 
 Matrice de transition finale sur le training set avec la validation croisée réalisée. histogramme des erreurs et importance des variables
 
 ## 7. Bibliographie
 
+* Reza Boostani, Foroozan Karimzadeh, Mohammad Torabi-Nami. A Comparative Review on Sleep
+Stage Classification Methods in Patients and healthy Individuals. 2016. <hal-01390384>
+* Khald Ali I. Aboalayon, Miad Faezipour, Wafaa S. Almuhammadi and Saeid Moslehpour.Sleep Stage Classification Using EEG Signal Analysis: A Comprehensive Survey and New Investigation
+* RUEY-SONG HUANG, LING-LING TSAI, AND CHUNG J. KUO. Selection of Valid and Reliable EEG Features for Predicting Auditory and Visual Alertness Levels
 
 
 
