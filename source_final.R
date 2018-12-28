@@ -66,10 +66,14 @@ imp = read.csv(paste0(data_folder,"imp2.csv"))
 imp[,1] = as.character(imp[,1])
 
 
-#better model ?
-f_RandomForest2 = randomForest(sleep_stage~.,
-                               data=df[,c("sleep_stage",subset(imp,imp[,2] > 150)[,1])],ntree=700,mtry = 48)
-print(f_RandomForest2)
+f_RandomForest3 = randomForest(sleep_stage~.,
+                               data=df[,c("sleep_stage",subset(imp,imp[,2] > 100)[,1])],ntree=700,mtry = 48)
+print(f_RandomForest3)  ##meilleur modele
+
+## individus out of bags
+hist(f_RandomForest3$oob.times)
+## variables d'importance
+varImpPlot(f_RandomForest3)
 
 ##bcp de variables...
 
@@ -87,9 +91,9 @@ dftest = cbind(dftest,df_alp)
 dftest = cbind(dftest,dftp)
 
 
-ytest = as.data.frame(predict(f_RandomForest2,dftest[,subset(imp,imp[,2] > 150)[,1]]))
+ytest = as.data.frame(predict(f_RandomForest3,dftest[,subset(imp,imp[,2] > 100)[,1]]))
 ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 
-write.csv(ytest,file = paste0(data_folder,"ytest_final_sans_basic.csv"),row.names = FALSE)
+write.csv(ytest,file = paste0(data_folder,"ytest_final.csv"),row.names = FALSE)
 #write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)

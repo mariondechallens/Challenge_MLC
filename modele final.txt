@@ -1,0 +1,57 @@
+ 
+## modèle à score de 0.62
+print(f_RandomForest3)
+
+Call:
+ randomForest(formula = sleep_stage ~ ., data = df[, c("sleep_stage",      subset(imp, imp[, 2] > 100)[, 1])], ntree = 700, mtry = 48) 
+               Type of random forest: classification
+                     Number of trees: 700
+No. of variables tried at each split: 48
+
+        OOB estimate of  error rate: 26.33%
+Confusion matrix:
+     0  1     2    3    4 class.error
+0 2460  6   753   18  382   0.3202542
+1  313 28   667   12  333   0.9793052
+2  371  4 14655  566 1536   0.1445832
+3   97  0  1564 4021   49   0.2983772
+4  292  8  3065   44 7045   0.3260953
+
+##variables
+>  subset(imp,imp[,2] > 100)[,1]
+ [1] "beta_amp_rel4"                     "alpha_sd2"                        
+ [3] "max_abs_.accelerometer_y"          "mean_abs_.accelerometer_y"        
+ [5] "mean_abs_.eeg_4"                   "wave2_sd_eeg2"                    
+ [7] "mean_abs_.accelerometer_x"         "mean_abs_.accelerometer_z"        
+ [9] "beta_amp_rel6"                     "alpha_amp_rel2"                   
+[11] "beta_amp_rel2"                     "max_abs_.accelerometer_x"         
+[13] "wave3_sd_eeg2"                     "mean_abs_.eeg_2"                  
+[15] "delta_amp_rel4"                    "mean_abs_.eeg_6"                  
+[17] "mean_abs_.pulse_oximeter_infrared" "mean_abs_.eeg_5"                  
+[19] "wave4_sd_eeg4"                     "mean_abs_.eeg_7"                  
+[21] "wave3_sd_eeg4"                     "max_abs_.eeg_2"                   
+[23] "wave2_ent_eeg4"                    "max_abs_.pulse_oximeter_infrared" 
+[25] "min_abs_.accelerometer_x"          "wave1_ent_eeg2"                   
+[27] "max_abs_.accelerometer_z"          "wave4_sd_eeg2"                    
+[29] "min_abs_.accelerometer_y"          "wave1_sd_eeg2"                    
+[31] "beta_amp_rel5"                     "beta_amp_rel7"                    
+[33] "alpha_sd1"                         "wave1_sd_eeg6"                    
+[35] "wave2_ent_eeg6"                    "wave1_sd_eeg4"                    
+[37] "wave2_sd_eeg1"                     "wave1_sd_eeg7"                    
+[39] "delta_amp_rel6"                    "max_abs_.eeg_4"                   
+[41] "alpha_sd7"                         "wave3_sd_eeg6"                    
+[43] "wave1_ent_eeg4"                    "delta_amp_rel2"                   
+[45] "beta_amp_rel3"                     "wave1_sd_eeg3"                    
+[47] "wave4_sd_eeg5"                     "wave2_sd_eeg7"                    
+[49] "wave1_sd_eeg5"                     "wave3_sd_eeg3"                    
+[51] "wave2_sd_eeg6"                     "wave1_sd_eeg1"                    
+[53] "delta_amp_rel5"                    "max_abs_.eeg_5"                   
+[55] "min_abs_.accelerometer_z"          "alpha_sd4"                        
+[57] "wave2_sd_eeg4"                     "beta_amp_rel1"                    
+[59] "alpha_amp_rel5"                    "wave2_sd_eeg5"                    
+[61] "alpha_sd5"                         "wave4_sd_eeg7"                    
+[63] "wave2_ent_eeg5"                    "alpha_sd6"                        
+[65] "wave2_ent_eeg7"                    "wave3_sd_eeg1"                    
+[67] "alpha_amp_rel4"                    "wave3_sd_eeg5"                    
+[69] "wave4_sd_eeg3"                     "max_abs_.eeg_3"                   
+[71] "alpha_sd3"                         "delta_amp_rel7"  
