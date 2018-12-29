@@ -62,7 +62,7 @@ eeg1 = as.data.frame(readDataSet(eeg1))
 
 On peut observer le premier enregistrement ci-dessous.
 ```{r Plot EEG1, echo = FALSE}
-plot(1:ncol(eeg1), eeg1[1, ], type = 'l', ylab = "Amplitude en uV", xlab = "30 secondes d'enregistrement `une fréquence de 50Hz", main = "EEG position 1 - enregist. 1")
+plot(1:ncol(eeg1), eeg1[1, ], type = 'l', ylab = "Amplitude en uV", xlab = "30 secondes d'enregistrement `une fréquence de 50Hz", main = "EEG position 1 - enregist. 1",align = "center")
 ```
 
 
@@ -363,6 +363,21 @@ L'algorithme permet d'évaluer des variables les plus influentes dans le modèle e
 Les features sélectionnés pour notre meilleur modèle (meilleur score) sont:
 
 
+
+
+Nous créons le modèle avec 700 arbres (ntree) et 48 variables piochées à chaque sous-modèle fabriqué (mtry). La commande est la suivante:
+
+```{r RF}
+
+# imp = read.csv(paste0(data_folder,"imp2.csv")) #fichier contenant les variables d'importance
+# imp[,1] = as.character(imp[,1])
+# 
+# f_RandomForest3 = randomForest(sleep_stage~.,
+#                                data=df[,c("sleep_stage",subset(imp,imp[,2] > 100)[,1])],ntree=700,mtry = 48)
+
+```
+
+Remarques : Il y a 71 variables dans le modèle sur plus de 200 calculées et testées, ce qui est beaucoup.
 ## 5. Protocole de validation croisée
 
 La validation croisée est réalisée par l'algorithme de Random Forest lui-même. Deux tiers ds données sont utilisés pour l'apprentissage et le reste pour le test du modèle. à faire qd mm ??
