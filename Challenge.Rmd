@@ -61,7 +61,7 @@ eeg1 = as.data.frame(readDataSet(eeg1))
 ```
 
 On peut observer le premier enregistrement ci-dessous.
-```{r Plot EEG1, echo = FALSE}
+```{r Plot EEG1, echo = FALSE,fig.align='center'}
 plot(1:ncol(eeg1), eeg1[1, ], type = 'l', ylab = "Amplitude en uV", xlab = "30 secondes d'enregistrement `une fréquence de 50Hz", main = "EEG position 1 - enregist. 1")
 ```
 
@@ -363,6 +363,24 @@ L'algorithme permet d'évaluer des variables les plus influentes dans le modèle e
 Les features sélectionnés pour notre meilleur modèle (meilleur score) sont:
 
 
+
+
+Nous créons le modèle avec 700 arbres (ntree) et 48 variables piochées à chaque sous-modèle fabriqué (mtry). La commande est la suivante:
+
+```{r RF}
+
+# fichier contenant les variables
+# imp = read.csv(paste0(data_folder,"imp2.csv"))  d'importance
+# imp[,1] = as.character(imp[,1])
+# 
+# f_RandomForest3 = randomForest(sleep_stage~.,
+#                                data=df[,c("sleep_stage",subset(imp,imp[,2] > 100)[,1])],
+# ntree=700,mtry = 48)
+
+```
+
+Remarques : Il y a 71 variables dans le modèle sur plus de 200 calculées et testées, ce qui reste beaucoup.
+
 ## 5. Protocole de validation croisée
 
 La validation croisée est réalisée par l'algorithme de Random Forest lui-même. Deux tiers ds données sont utilisés pour l'apprentissage et le reste pour le test du modèle. à faire qd mm ??
@@ -374,7 +392,28 @@ Choix du nombre d'arbres ??
 
 Choix du nombre de variables tirées aléatoirement avec remise à chaque étape de l'algorithme ??
 
-Matrice de transition finale sur le training set avec la validation croisée réalisée. histogramme des erreurs et importance des variables
+La matrice de transition du modèle final sur le training set avec la validation croisée réalisée par la fonction RandomForest de R est la suivante:
+
+```{r transi}
+# Call:
+#  randomForest(formula = sleep_stage ~ ., data = df[, c("sleep_stage",      subset(imp, imp[, 2] > 100)[, 1])], ntree = 700, mtry = 48) 
+#                Type of random forest: classification
+#                      Number of trees: 700
+# No. of variables tried at each split: 48
+# 
+#         OOB estimate of  error rate: 26.33%
+# Confusion matrix:
+#      0  1     2    3    4 class.error
+# 0 2460  6   753   18  382   0.3202542
+# 1  313 28   667   12  333   0.9793052
+# 2  371  4 14655  566 1536   0.1445832
+# 3   97  0  1564 4021   49   0.2983772
+# 4  292  8  3065   44 7045   0.3260953
+```
+Le taux d'erreur est de 26,33% avec un stade 1 qui a le plus mauvais taux de classement correct malgré les features sur les ondes alpha censés le caractériser davantage. Le stade 2 est le mieux classé et les trois autres stades ont des taux d'erreur similaires. On remarque également que la majorité des erreurs de classement se fait en classant le stade dans le stade 2 au lieu de son stade réel. 
+
+importance des variables: expliquer et commenter
+histogramme des out of bag : expliquer et commenter
 
 ## 7. Bibliographie
 
