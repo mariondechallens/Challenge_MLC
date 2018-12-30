@@ -362,9 +362,38 @@ L'algorithme permet d'évaluer des variables les plus influentes dans le modèle e
 
 Les features sélectionnés pour notre meilleur modèle (meilleur score) sont:
 
-
-
-
+```{r features}
+#"beta_amp_rel4", amplitude relative pour les ondes beta sur l'EEG 4;
+#"alpha_sd2", ecart type du signal des ondes alpha sur l'EEG 2; 
+#"max_abs_.accelerometer_y", maximum de la valeur absolue du signal de l'accéléromètre suivant y; 
+#"mean_abs_.accelerometer_y", moyenne de la valeur absolue du signal de l'accéléromètre suivant y;  
+#"mean_abs_.eeg_4", moyenne de la valeur absolue du signal de l'EEG 4;  
+#"wave2_sd_eeg2", écart-type sur les ondelettes 2 de l'EEG 2;
+#"mean_abs_.accelerometer_x", moyenne de la valeur absolue du signal de l'accéléromètre suivant x;  
+#"mean_abs_.accelerometer_z", moyenne de la valeur absolue du signal de l'accéléromètre suivant z;  
+#"beta_amp_rel6", amplitude relative pour les ondes beta sur l'EEG 6; 
+#"alpha_amp_rel2", amplitude relative pour les ondes alpha sur l'EEG 2; 
+#"beta_amp_rel2", amplitude relative pour les ondes beta sur l'EEG 2; 
+#"max_abs_.accelerometer_x", maximum de la valeur absolue du signal de l'accéléromètre suivant x; 
+#"wave3_sd_eeg2", écart-type sur les ondelettes 3 de l'EEG 2; 
+#"mean_abs_.eeg_2", moyenne de la valeur absolue du signal de l'EEG 2;  
+#"delta_amp_rel4", amplitude relative pour les ondes delta sur l'EEG 4; 
+#"mean_abs_.eeg_6", moyenne de la valeur absolue du signal de l'EEG 6;  
+#"mean_abs_.pulse_oximeter_infrared", moyenne de la valeur absolue du signal de l'oxymètre; 
+#"mean_abs_.eeg_5", moyenne de la valeur absolue du signal de l'EEG 5;  
+#"wave4_sd_eeg4", écart-type sur les ondelettes 4 de l'EEG 4; 
+#"mean_abs_.eeg_7", moyenne de la valeur absolue du signal de l'EEG 7;  
+#"wave3_sd_eeg4", écart-type sur les ondelettes 3 de l'EEG 4; 
+#"max_abs_.eeg_2", maximum de la valeur absolue du signal de l'EEG 2; 
+#"wave2_ent_eeg4", entropie sur les ondelettes 2 de l'EEG 4;  
+#"max_abs_.pulse_oximeter_infrared", maximum de la valeur absolue du signal de l'oxymètre;  
+#"min_abs_.accelerometer_x", minimum de la valeur absolue du signal de l'accéléromètre suivant x; 
+#"wave1_ent_eeg2", entropie sur les ondelettes 1 de l'EEG 2;  
+#"max_abs_.accelerometer_z", maximum de la valeur absolue du signal de l'accéléromètre suivant z; 
+#"wave4_sd_eeg2", écart-type sur les ondelettes 4 de l'EEG 2; 
+#*"min_abs_.accelerometer_y", minimum de la valeur absolue du signal de l'accéléromètre suivant y; 
+#"wave1_sd_eeg2", écart-type sur les ondelettes 1 de l'EEG 2.
+```
 Nous créons le modèle avec 700 arbres (ntree) et 48 variables piochées à chaque sous-modèle fabriqué (mtry). La commande est la suivante:
 
 ```{r RF}
@@ -383,20 +412,22 @@ Remarques : Il y a 71 variables dans le modèle sur plus de 200 calculées et test
 
 ## 5. Protocole de validation croisée
 
-La validation croisée est réalisée par l'algorithme de Random Forest lui-même. Deux tiers ds données sont utilisés pour l'apprentissage et le reste pour le test du modèle. à faire qd mm ??
+La validation croisée est réalisée par l'algorithme de Random Forest lui-même (le "Out-of-the-bag error estimate").Pour chaque arbre simulé, deux tiers des données tiré aléatoirement sont utilisés pour l'apprentissage et le reste pour le test du modèle. A chaque simulation, l'algorithme simule l'arbre de classification, puis va classifier les données test à partir de cet arbre.
+A la fin de l'algorithme, on regarde quelle observation "j"" a eu le meilleur score de proximité lorsque l'observation "n"" est "out-of-the-bag", ce qui nous permettra d'obtenir l'estimation d'erreur "out-of-the-bag" en normalisant avec le nombre d'arbre utilisé.
 
 
 ## 6. Présentation des résultats
 
-Choix du nombre d'arbres ??
+Nous avons choisi 700 arbres pour notre algorithme de "random forest". Ce nombre semblait être un bon compromis entre la fiabilité de nos résultats et le temps de calcul.
 
-Choix du nombre de variables tirées aléatoirement avec remise à chaque étape de l'algorithme ??
+Pour le nombre de variables tirées aléatoirement avec remise à chaque étape de l'algorithme, nous avons choisi 48 car ce nombre est supérieur au nombre par défaut de l'algorithme, mais permettait d'obtenir un temps de calcul raisonnable.
 
 La matrice de transition du modèle final sur le training set avec la validation croisée réalisée par la fonction RandomForest de R est la suivante:
 
 ```{r transi}
 # Call:
-#  randomForest(formula = sleep_stage ~ ., data = df[, c("sleep_stage",      subset(imp, imp[, 2] > 100)[, 1])], ntree = 700, mtry = 48) 
+#  randomForest(formula = sleep_stage ~ ., data = df[, c("sleep_stage",
+#subset(imp, imp[, 2] > 100)[, 1])], ntree = 700, mtry = 48) 
 #                Type of random forest: classification
 #                      Number of trees: 700
 # No. of variables tried at each split: 48
@@ -412,8 +443,17 @@ La matrice de transition du modèle final sur le training set avec la validation 
 ```
 Le taux d'erreur est de 26,33% avec un stade 1 qui a le plus mauvais taux de classement correct malgré les features sur les ondes alpha censés le caractériser davantage. Le stade 2 est le mieux classé et les trois autres stades ont des taux d'erreur similaires. On remarque également que la majorité des erreurs de classement se fait en classant le stade dans le stade 2 au lieu de son stade réel. 
 
-importance des variables: expliquer et commenter
-histogramme des out of bag : expliquer et commenter
+```{r Plot imp variables, echo = FALSE,fig.align='center'}
+knitr::include_graphics('Rplot_imp_variables.png')
+```
+Sur ce graphe nous avons présenté les variables de plus grande importance et leur score associé. Nous voyons donc que les cinq premières variables les plus importantes se démarquent beaucoup des autres en ayant un score largement supérieur aux autres, les autres ayant un score décroissant mais relativement proche les unes des autres.
+
+
+```{r Plot OOB, echo = FALSE,fig.align='center'}
+knitr::include_graphics('Rplot_out_ofbag.png')
+```
+Ce graphe présente la répartition de l'utilisation des données. On voit donc que la sélection aléatoire des données "out-of-the-bag" suit une gaussienne, de moyenne environ 255, ce qui correspond à un peu plus du tiers du nombre d'arbres. Ce résultat est cohérent puisqu'on cherche en théorie à tester chaque observations dans un tiers des cas. Notre simulation est donc cohérente.
+
 
 ## 7. Bibliographie
 
@@ -421,6 +461,7 @@ histogramme des out of bag : expliquer et commenter
 Stage Classification Methods in Patients and healthy Individuals. 2016. <hal-01390384>
 * Khald Ali I. Aboalayon, Miad Faezipour, Wafaa S. Almuhammadi and Saeid Moslehpour.Sleep Stage Classification Using EEG Signal Analysis: A Comprehensive Survey and New Investigation
 * RUEY-SONG HUANG, LING-LING TSAI, AND CHUNG J. KUO. Selection of Valid and Reliable EEG Features for Predicting Auditory and Visual Alertness Levels
+* https://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm#prox
 
 
 

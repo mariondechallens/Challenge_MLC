@@ -10,8 +10,8 @@ library(seewave)
 data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
 file_folder = "C:/Users/Admin/Documents/GitHub/Challenge_MLC/"
 
-# data_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
-# file_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
+data_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
+file_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
 
 ytrain = read.csv(paste0(data_folder,"train_y.csv"))
 yrandom = read.csv(paste0(data_folder,"sample_submission.csv"))
