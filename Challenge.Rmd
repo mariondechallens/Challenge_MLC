@@ -412,8 +412,9 @@ Remarques : Il y a 71 variables dans le modèle sur plus de 200 calculées et test
 
 ## 5. Protocole de validation croisée
 
-La validation croisée est réalisée par l'algorithme de Random Forest lui-même (le "Out-of-the-bag error estimate").Pour chaque arbre simulé, deux tiers des données tiré aléatoirement sont utilisés pour l'apprentissage et le reste pour le test du modèle. A chaque simulation, l'algorithme simule l'arbre de classification, puis va classer les données test à partir de cet arbre.
-A la fin de l'algorithme, on regarde quelle observation "j"" a eu le meilleur score de proximité lorsque l'observation "n"" est "out-of-the-bag", ce qui nous permettra d'obtenir l'estimation d'erreur "out-of-the-bag" en normalisant avec le nombre d'arbre utilisé.
+La validation croisée est réalisée par l'algorithme de Random Forest lui-même (le "Out-of-the-bag error estimate").Pour chaque arbre simulé, deux tiers des données tiré aléatoirement sont utilisés pour l'apprentissage et le reste pour le test du modèle. A chaque simulation, l'algorithme simule l'arbre de classification, puis va classer les données test à partir de cet arbre. 
+
+Après la simulation de tous les arbres, nous allons alors pouvoir calculer la "out-of-the-bag error estimate" comme suit : pour chaque individu "n", nous allons lui attribuer la classe "j" comme étant celle pour laquelle il a été classifié le plus grand nombre de fois. Ainsi, la "out-of-the-bag error" est obtenue en prenant le nombre de fois où "j" n'est pas la bonne classe de l'individu "n" divisé par le nombre total d'individu.
 
 
 ## 6. Présentation des résultats
