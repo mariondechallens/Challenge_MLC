@@ -448,12 +448,12 @@ knitr::include_graphics('Rplot_imp_variables.png')
 ```
 Sur ce graphe nous avons présenté l'importance des variables du modèle et leur score associé. Un point corresppod à une variable. Nous voyons donc que les cinq premières variables les plus importantes se démarquent beaucoup des autres en ayant un score largement supérieur aux autres, les autres ayant un score décroissant mais relativement proche les unes des autres. Nos tests montrent cependant que les autres variables sont essentielles pour le modèle. Les plus importantes sont : 
 
-+ Amplitude relative pour les ondes beta sur l'EEG 4;
-+ Ecart type du signal des ondes alpha sur l'EEG 2; 
-+ Maximum de la valeur absolue du signal de l'accéléromètre suivant y; 
-+ Moyenne de la valeur absolue du signal de l'accéléromètre suivant y;  
-+ Moyenne de la valeur absolue du signal de l'EEG 4;  
-+ Ecart-type des coefficients de l'ondelette 2 de l'EEG 2;
++ Amplitude relative pour les ondes beta sur l'EEG 4
++ Ecart type du signal des ondes alpha sur l'EEG 2
++ Maximum de la valeur absolue du signal de l'accéléromètre suivant y 
++ Moyenne de la valeur absolue du signal de l'accéléromètre suivant y  
++ Moyenne de la valeur absolue du signal de l'EEG 4 
++ Ecart-type des coefficients de l'ondelette 2 de l'EEG 2
 
 On remarque ici que les enregistrements EEG  2 et 4 et de l'accéléromètre suivant y semblent être les plus influents dans la classification.
 
@@ -461,7 +461,7 @@ On remarque ici que les enregistrements EEG  2 et 4 et de l'accéléromètre suivan
 ```{r Plot OOB, echo = FALSE,fig.align='center'}
 knitr::include_graphics('Rplot_out_ofbag.png')
 ```
-Ce graphe présente la répartition de l'utilisation des données. On voit donc que la sélection aléatoire des données "out-of-the-bag" suit une gaussienne, de moyenne environ 255, ce qui correspond à un peu plus du tiers du nombre d'arbres. Ce résultat est cohérent puisqu'on cherche en théorie à tester chaque observations dans un tiers des cas. Notre simulation est donc cohérente.
+Ce graphe présente l'histogramme du nomre d'individus out-of-the-bag, c'est-à-dire non piochés lors de la création de l'échantillon bootstrap (données d'apprentissage) pour un sous-modèle et utilisé comme données test pour le sous modèle considéré. On voit donc que la sélection aléatoire des données "out-of-the-bag" suit une gaussienne, de moyenne environ 255, ce qui correspond à un peu plus du tiers du nombre d'arbres. Ce résultat est cohérent puisqu'on cherche en théorie à tester chaque observations dans un tiers des cas. Notre simulation est donc cohérente.
 
 
 ## 7. Bibliographie
@@ -470,7 +470,7 @@ Ce graphe présente la répartition de l'utilisation des données. On voit donc que
 Stage Classification Methods in Patients and healthy Individuals. 2016. <hal-01390384>
 * Khald Ali I. Aboalayon, Miad Faezipour, Wafaa S. Almuhammadi and Saeid Moslehpour.Sleep Stage Classification Using EEG Signal Analysis: A Comprehensive Survey and New Investigation
 * RUEY-SONG HUANG, LING-LING TSAI, AND CHUNG J. KUO. Selection of Valid and Reliable EEG Features for Predicting Auditory and Visual Alertness Levels
-* https://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm#prox
+* Leo Breiman and Adele Cutler, Random Forests, Cours de l'université de Berkeley, Californie
 
 
 

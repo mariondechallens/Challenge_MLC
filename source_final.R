@@ -54,13 +54,8 @@ df = merge(df,df_abs, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 df = merge(df,dfp, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
 
-f_RandomForest = randomForest(sleep_stage~.,data=df[,2:ncol(df)],mtry = 128)
-print(f_RandomForest)
 
 #Variables d'importance 
-imp = as.data.frame(f_RandomForest$importance[order(f_RandomForest$importance[, 1],
-                                                    decreasing = TRUE), ])
-write.csv(imp,file = paste0(data_folder,"imp2.csv"),row.names = TRUE)
 
 imp = read.csv(paste0(data_folder,"imp2.csv"))
 imp[,1] = as.character(imp[,1])
@@ -96,4 +91,3 @@ ytest = cbind(yrandom[,1],ytest)
 colnames(ytest) =  c("id","sleep_stage")
 
 write.csv(ytest,file = paste0(data_folder,"ytest_final.csv"),row.names = FALSE)
-#write.csv(ytest,file = paste0("ytest_freq_prop3.csv"),row.names = FALSE)
