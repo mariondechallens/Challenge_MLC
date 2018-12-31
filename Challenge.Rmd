@@ -421,7 +421,7 @@ La validation croisée est réalisée par l'algorithme de Random Forest lui-même (l
 
 Après la simulation de tous les arbres, l'algorithme calcule la "out-of-the-bag error estimate" comme suit : pour chaque individu "n" out-of-the-bag d'un sous-modèle, l'algorithme lui attribue la classe "j" comme étant celle pour laquelle il a été classé le plus grand nombre de fois. Ainsi, la "out-of-the-bag error" de l'individu "n" est obtenue en prenant le nombre de fois où "j" n'est pas la bonne classe de l'individu divisé par le nombre total d'individu. La OOB error affichée est alors la moyenne des erreurs sur tous les individus out-of-the-bag de tous les sous-modèles.
 
-Cette erreur est calculée est donc de la valisation croisée car les individus out-of-the-bag consitituent l'échantillon test avec en moyenne un tiers des données (voir graphique de la section suivante.)
+Cette erreur calculée est donc de la validation croisée car les individus out-of-the-bag constituent l'échantillon test avec en moyenne un tiers des données (voir graphique de la section suivante.)
 
 
 ## 6. Présentation des résultats
