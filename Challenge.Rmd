@@ -12,7 +12,7 @@ Ce challenge est réalisé en partenariat avec l'entreprise Dreem qui est une star
 
 ### Contexte du challenge
 
-Ce challenge consiste à réaliser de la classification en stades de sommeil. Une nuit voit défiler plusieurs cycles de sommeil qui se composent tous d'une phase : 
+Ce challenge consiste à réaliser de la classification en stades de sommeil. Une nuit voit en effet défiler plusieurs cycles de sommeil qui se composent tous d'une phase : 
 
 * d'éveil
 * de sommeil léger
@@ -29,7 +29,7 @@ Dans cette optique de mesure, la société Dreem a développé un bandeau qui foncti
 
 ### Le challenge
 
-Ce bandeau enregistre donc une certaines quantité de données par nuit et l'objectif de ce challenge est de développer un algorithme permettant, à partir des données de 30 secondes d'enregistrement du bandeau, dans quel stade de sommeil parmi les quatre cités plus haut se trouve la personne.
+Ce bandeau enregistre donc une certaine quantité de données par nuit et l'objectif de ce challenge est de développer un algorithme permettant, à partir des données de 30 secondes d'enregistrement du bandeau, dans quel stade de sommeil parmi les quatre cités plus haut se trouve la personne.
 
 Nous avons pour cela à notre disposition 7 enregistrements d'encéphalogramme (sept positions différentes sur la tête), 1 enregistrement d'oxymètre et 3 enregistrement d'accéléromètre. Ces enregistrements sont de 30 secondes et ils sont labellisés i.e. nous connaissons le stade de sommeil associé.
 
@@ -38,7 +38,7 @@ Nous avons pour cela à notre disposition 7 enregistrements d'encéphalogramme (se
 Les données sont présentées sous le format h5 afin de faciliter leur manipulation au vu de leur taille trés volumineuse.
 Nous disposons en effet de sept bases de données d'enregistrements d'encéphalogrammes contenant chacun 38289 lignes de 1500 valeurs, ce qui correspond à une fréquence de 50Hz. Les quatres autres bases de données ne contiennent que 300 valeurs par enregistrement (fréquence de 10Hz).
 
-Afin de lire et manipuler ces données, nous utilisons le package `h5`de R.
+Afin de lire et manipuler ces données, nous utilisons le package `h5` de R.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -60,7 +60,7 @@ eeg1 = xtrain[list.datasets(xtrain, recursive = TRUE)[4]]
 eeg1 = as.data.frame(readDataSet(eeg1))
 ```
 
-On peut observer le premier enregistrement ci-dessous.
+On peut observer le premier enregistrement EEG ci-dessous.
 ```{r Plot EEG1, echo = FALSE,fig.align='center'}
 plot(1:ncol(eeg1), eeg1[1, ], type = 'l', ylab = "Amplitude en uV", xlab = "30 secondes d'enregistrement `une fréquence de 50Hz", main = "EEG position 1 - enregist. 1")
 ```
@@ -70,7 +70,7 @@ plot(1:ncol(eeg1), eeg1[1, ], type = 'l', ylab = "Amplitude en uV", xlab = "30 s
 
 Afin de construire un modèle de classification des données en stade de sommeil, nous avons extrait des signaux un certain nombre de features. Nous les avons ensuite testés en appliquant l'algorithme de classification présenté dans la section suivante afin de déterminer l'importance de leur influence sur la détermination du stade de sommeil.
 
-Nous avons utilisé pour différentes approches pour le choix des features à extraire, suite à des recherches bibliographiques dont les sources sont citées plus bas.
+Nous avons utilisé différentes approches pour le choix des features à extraire, suite à des recherches bibliographiques dont les sources sont citées plus bas.
 
 Nous avons d'abord calculé des features basiques sur tous les signaux: l'écart-type et la moyenne du signal, la moyenne, le minimum et le maximum du signal en valeur absolue. Nous utilisons les deux fonctions suivantes pour calculer les quantités sur le signal en valeur absolue et enregistrer les données ainsi calculées.
 
@@ -121,7 +121,7 @@ print("Fonction calcul_feat_base2")
 print(calcul_feat_base2)
 ```
 
-Ensuite, en nous appuyant sur les ondes caractéristiques présentes dans les différents stades de sommeil nous avons réalisé deux types de décomposition des signaux EEG. En effet, on peut distinguer quatre types d'onde entre 0 et 30Hz:
+Ensuite, en nous appuyant sur les ondes caractéristiques présentes dans les différents stades de sommeil, nous avons réalisé deux types de décomposition des signaux EEG. En effet, on peut distinguer quatre types d'onde entre 0 et 30Hz:
 
 * les ondes alpha entre 8 et 13Hz
 * les ondes theta entre 4 et 8Hz
@@ -354,7 +354,7 @@ print(rassembler_feat_alpha)
 ```
 ## 4. Modèle utilisé - Description théorique
 
-Nous utilisons l'algorithme de Random Forest pour la classification. Il s'agit d'un algorithme d'agrégation de modèles (boosting) qui consiste à rassembler des modèles simples afin d'aboutir à un modèle final performant. L'algorithme de RandomForest consiste en effet à générer un certain nombre de modèles simples(arbres de décision). Chaque modèle est généré sur un échantillon bootstrap des données, c'est-à-dire que l'on pioche avec remise n individus parmi N pour construire l'échantillon. On choisit également aléatoirement un sous-ensemble de variables pour créer le modèle sur cet échantillon. Il y a ainsi deux niveaux d'aléatoire dans l'algorithme de RandomForest: au niveau des individus et des variables piochés pour chaque modèle simple.
+Nous utilisons l'algorithme de Random Forest pour la classification. Il s'agit d'un algorithme d'agrégation de modèles (boosting) qui consiste à rassembler des modèles simples afin d'aboutir à un modèle final performant. L'algorithme de RandomForest consiste en effet à générer un certain nombre de modèles simples (arbres de décision). Chaque modèle est généré sur un échantillon bootstrap des données, c'est-à-dire que l'on pioche avec remise n individus parmi N pour construire l'échantillon. On choisit également aléatoirement un sous-ensemble de variables pour créer le modèle sur cet échantillon. Il y a ainsi deux niveaux d'aléatoire dans l'algorithme de RandomForest: au niveau des individus et des variables piochés pour chaque modèle simple.
 
 L'algorithme permet d'évaluer des variables les plus influentes dans le modèle et donc de créer ensuite des modèles contenant moins de variables (celles jugées comme plus importantes). Ceci nous a donc permis de sélectionner les principaux features de notre modèle et obtenir ainsi un modèle plus performant que celui contenant l'ensemble des variables.
 
@@ -413,11 +413,11 @@ Vous trouverez dans les trois fichiers .R joints le code complet utilisé pour la
 * fonctions_final.R: code contenant les fonctions pour calculer les features.
 * features_final.R: code contenant les calculs des features et leur enregistrement dans des tableaux csv.
 
-* source_final.R: code appelant les deux fichiers précédents, générant les features et le tableau final des features, crééant le modèle final et calculant enfin les classes de l'áchantillon test.
+* source_final.R: code appelant les deux fichiers précédents, générant les features et le tableau final des features, crééant le modèle final et calculant enfin les classes de l'échantillon test.
 
 ## 5. Protocole de validation croisée
 
-La validation croisée est réalisée par l'algorithme de Random Forest lui-même (le "Out-of-the-bag error estimate").Pour chaque arbre simulé, deux tiers des données tiré aléatoirement est utilisé pour l'apprentissage et le reste pour le test du modèle. À chaque simulation, l'algorithme simule l'arbre de classification avec les données d'apprentissage, puis classe les données test à partir de cet arbre. 
+La validation croisée est réalisée par l'algorithme de Random Forest lui-même (le "Out-of-the-bag error estimate"). Pour chaque arbre simulé, deux tiers des données tiré aléatoirement est utilisé pour l'apprentissage et le reste pour le test du modèle. À chaque simulation, l'algorithme simule l'arbre de classification avec les données d'apprentissage, puis classe les données test à partir de cet arbre. 
 
 Après la simulation de tous les arbres, l'algorithme calcule la "out-of-the-bag error estimate" comme suit : pour chaque individu "n" out-of-the-bag d'un sous-modèle, l'algorithme lui attribue la classe "j" comme étant celle pour laquelle il a été classé le plus grand nombre de fois. Ainsi, la "out-of-the-bag error" de l'individu "n" est obtenue en prenant le nombre de fois où "j" n'est pas la bonne classe de l'individu divisé par le nombre total d'individu. La OOB error affichée est alors la moyenne des erreurs sur tous les individus out-of-the-bag de tous les sous-modèles.
 
@@ -430,7 +430,7 @@ Nous avons choisi 700 arbres pour notre algorithme de "random forest". Ce nombre
 
 Pour le nombre de variables tirées aléatoirement avec remise à chaque étape de l'algorithme, nous avons choisi 48. En effet, étant donné le nombre important de variables de notre matrice (plus de 200), il est logique d'augmenter également le nombre de variables piochées aléatoirement lors de la construction de l'échantillon boostraop pour chaque sous-modèle. Plus ce nombre augmentait, plus notre modèle était satisfaisant, c'est pourquoi nous choisissons 48 qui semblait être le nombre maximal possible dans la fonction.
 
-La matrice de transition du modèle final sur le training set avec la validation croisée réalisée par la fonction RandomForest de R est la suivante:
+La matrice de transition du modèle final sur le training set avec la validation croisée (erreur out-of-the-bag) réalisée par la fonction RandomForest de R est la suivante:
 
 ```{r transi}
 # Call:
@@ -460,8 +460,7 @@ Sur ce graphe nous avons présenté l'importance des variables du modèle et leur s
 + Ecart type du signal des ondes alpha sur l'EEG 2
 + Maximum de la valeur absolue du signal de l'accéléromètre suivant y 
 + Moyenne de la valeur absolue du signal de l'accéléromètre suivant y  
-+ Moyenne de la valeur absolue du signal de l'EEG 4 
-+ Ecart-type des coefficients de l'ondelette 2 de l'EEG 2
++ Moyenne de la valeur absolue du signal de l'EEG 4
 
 On remarque ici que les enregistrements EEG  2 et 4 et de l'accéléromètre suivant y semblent être les plus influents dans la classification.
 
@@ -469,7 +468,7 @@ On remarque ici que les enregistrements EEG  2 et 4 et de l'accéléromètre suivan
 ```{r Plot OOB, echo = FALSE,fig.align='center'}
 knitr::include_graphics('Rplot_out_ofbag.png')
 ```
-Ce graphe présente l'histogramme du nomre d'individus out-of-the-bag, c'est-à-dire non piochés lors de la création de l'échantillon bootstrap (données d'apprentissage) pour un sous-modèle et utilisé comme données test pour le sous modèle considéré. On voit donc que la sélection aléatoire des données "out-of-the-bag" suit une gaussienne, de moyenne environ 255, ce qui correspond à un peu plus du tiers du nombre d'arbres. Ce résultat est cohérent puisqu'on cherche en théorie à tester chaque observations dans un tiers des cas. Notre simulation est donc cohérente.
+Ce graphe présente l'histogramme du nombre d'individus out-of-the-bag, c'est-à-dire non piochés lors de la création de l'échantillon bootstrap (données d'apprentissage) pour un sous-modèle et utilisé comme données test pour le sous modèle considéré. On voit donc que la sélection aléatoire des données "out-of-the-bag" suit une gaussienne, de moyenne environ 255, ce qui correspond à un peu plus du tiers du nombre d'arbres, c'est-à-dire de sous-modèles fabriqués pour le modèle final. Ce résultat est cohérent puisqu'on cherche en théorie à tester chaque observation dans un tiers des cas. Notre simulation est donc cohérente.
 
 
 ## 7. Bibliographie
