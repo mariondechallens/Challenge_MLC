@@ -312,11 +312,9 @@ calcul_feat_alpha = function(x,train = TRUE) #x = xtrain ou xtest
     {
       df =cbind(ytrain,df)
       write.csv(df,file = paste0(data_folder,"alpha_eeg",i-3,".csv"),row.names = FALSE)
-      #write.csv(df,file = paste0("freq_prop_eeg",i-3,".csv"),row.names = FALSE)
     }
     else
-      write.csv(df,file = paste0(data_folder,"alpha_egg",i-3,"_test.csv"),row.names = FALSE)
-      #write.csv(df,file = paste0("freq_prop_egg",i-3,"_test.csv"),row.names = FALSE)   
+      write.csv(df,file = paste0(data_folder,"alpha_egg",i-3,"_test.csv"),row.names = FALSE)  
   }
   rm(data)
 }
@@ -412,9 +410,9 @@ Remarques : Il y a 71 variables dans le modèle sur plus de 200 calculées et test
 
 ## 5. Protocole de validation croisée
 
-La validation croisée est réalisée par l'algorithme de Random Forest lui-même (le "Out-of-the-bag error estimate").Pour chaque arbre simulé, deux tiers des données tiré aléatoirement sont utilisés pour l'apprentissage et le reste pour le test du modèle. A chaque simulation, l'algorithme simule l'arbre de classification, puis va classer les données test à partir de cet arbre. 
+La validation croisée est réalisée par l'algorithme de Random Forest lui-même (le "Out-of-the-bag error estimate").Pour chaque arbre simulé, deux tiers des données tiré aléatoirement est utilisé pour l'apprentissage et le reste pour le test du modèle. À chaque simulation, l'algorithme simule l'arbre de classification avec les données d'apprentissage, puis classe les données test à partir de cet arbre. 
 
-Après la simulation de tous les arbres, nous allons alors pouvoir calculer la "out-of-the-bag error estimate" comme suit : pour chaque individu "n", nous allons lui attribuer la classe "j" comme étant celle pour laquelle il a été classifié le plus grand nombre de fois. Ainsi, la "out-of-the-bag error" est obtenue en prenant le nombre de fois où "j" n'est pas la bonne classe de l'individu "n" divisé par le nombre total d'individu.
+Après la simulation de tous les arbres, nous allons alors pouvoir calculer la "out-of-the-bag error estimate" comme suit : pour chaque individu "n", nous allons lui attribuer la classe "j" comme étant celle pour laquelle il a été classé le plus grand nombre de fois. Ainsi, la "out-of-the-bag error" est obtenue en prenant le nombre de fois où "j" n'est pas la bonne classe de l'individu "n" divisé par le nombre total d'individu.
 
 
 ## 6. Présentation des résultats
