@@ -67,10 +67,9 @@ print(f_RandomForest3)  ##meilleur modele
 
 ## individus out of bags
 hist(f_RandomForest3$oob.times)
-## variables d'importance
+## importance des variables
 varImpPlot(f_RandomForest3)
 
-##bcp de variables...
 
 #prediction
 dft = rassembler_feat(train = FALSE) ##ent Renyi et sd sur vaguelettes
