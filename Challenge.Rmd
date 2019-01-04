@@ -31,7 +31,7 @@ Dans cette optique de mesure, la société Dreem a développé un bandeau qui foncti
 
 Ce bandeau enregistre donc une certaine quantité de données par nuit et l'objectif de ce challenge est de développer un algorithme permettant, à partir des données de 30 secondes d'enregistrement du bandeau, dans quel stade de sommeil parmi les quatre cités plus haut se trouve la personne.
 
-Nous avons pour cela à notre disposition 7 enregistrements d'encéphalogramme (sept positions différentes sur la tête), 1 enregistrement d'oxymètre et 3 enregistrement d'accéléromètre. Ces enregistrements sont de 30 secondes et ils sont labellisés i.e. nous connaissons le stade de sommeil associé.
+Nous avons pour cela à notre disposition 7 enregistrements d'encéphalogramme (sept positions différentes sur la tête), 1 enregistrement d'oxymètre et 3 enregistrements d'accéléromètre. Ces enregistrements sont de 30 secondes et ils sont labellisés i.e. nous connaissons le stade de sommeil associé.
 
 ## 2. Prétraitement des données
 
@@ -62,7 +62,7 @@ eeg1 = as.data.frame(readDataSet(eeg1))
 
 On peut observer le premier enregistrement EEG ci-dessous.
 ```{r Plot EEG1, echo = FALSE,fig.align='center'}
-plot(1:ncol(eeg1), eeg1[1, ], type = 'l', ylab = "Amplitude en uV", xlab = "30 secondes d'enregistrement `une fréquence de 50Hz", main = "EEG position 1 - enregist. 1")
+plot(1:ncol(eeg1), eeg1[1, ], type = 'l', ylab = "Amplitude en uV", xlab = "30 secondes d'enregistrement d'une fréquence de 50Hz", main = "EEG position 1 - enregist. 1")
 ```
 
 
