@@ -408,7 +408,7 @@ Nous créons le modèle avec 700 arbres (ntree) et 48 variables piochées à chaque 
 
 Remarque : Il y a 71 variables dans le modèle sur plus de 200 calculées et testées, ce qui reste beaucoup. Ce nombre de variables est cependant le compromis que l'on a trouvé pour obtenir un bon score.
 
-Vous trouverez dans les trois fichiers .R joints le code complet utilisé pour la génération du modèle:
+Vous trouverez dans la partie 8 du rapport les trois fichiers .R du code complet utilisé pour la génération du modèle:
 
 * fonctions_final.R: code contenant les fonctions pour calculer les features.
 * features_final.R: code contenant les calculs des features et leur enregistrement dans des tableaux csv.
@@ -479,5 +479,530 @@ Stage Classification Methods in Patients and healthy Individuals. 2016. <hal-013
 * RUEY-SONG HUANG, LING-LING TSAI, AND CHUNG J. KUO. Selection of Valid and Reliable EEG Features for Predicting Auditory and Visual Alertness Levels
 * Leo Breiman and Adele Cutler, Random Forests, Cours de l'université de Berkeley, Californie
 
+## 8. Codes R
+```{r fonc}
+print("fonctions_final.R")
+### Fonctions
+
+val_absolue = function(x)
+{
+  abx = abs(as.numeric(x))
+  ma = mean(abx)
+  max = max(abx)
+  min = min(abx)
+  
+  return( c(ma,max,min))
+}
+
+#feature : MMD (max min distance <=> amplitude)
+MMD = function(x){
+  x = as.numeric(x)
+  if (length(x) > 100)
+    lambda = 100
+  if (length(x) > 10 && length(x) <= 100)
+    lambda = 10
+  
+  res = 0
+  n = length(x)/lambda
+  
+  if (n > 10)
+  {
+    for (i in 1:n)
+    {
+      x_i=x[(1 + (i-1)*lambda) : (i*lambda)]
+      My = max(x_i)
+      Mx = seq(along = x_i)[x_i== My]
+      my = min(x_i)
+      mx = seq(along = x_i)[x_i== my]
+      
+      res = res + sqrt((mx - Mx)^2 + (my - My)^2)
+    }
+  }
+  
+  return(res)
+}
+
+nonvide = function(x){
+  if (length(x) == 0)
+    return(0)
+  else
+    return(x)
+}
 
 
+### decomposition en 4 ondelettes et filtre Daubechies 20, calcule sd et entro
+wavelet_coeff4 = function(x)
+{
+  d = dwt(as.numeric(x),n.levels = 4,filter = "d20")
+  
+  wave1_ent = sh(spec(nonvide(d@W$W1),f=50,plot = FALSE), alpha =0.5)
+  wave1_sd = sd(nonvide(d@W$W1))
+  
+  wave2_ent = sh(spec(nonvide(d@W$W2),f=50,plot = FALSE), alpha =0.5)
+  wave2_sd = sd(nonvide(d@W$W2))
+  
+  wave3_ent = sh(spec(nonvide(d@W$W3),f=50,plot = FALSE), alpha =0.5)
+  wave3_sd = sd(nonvide(d@W$W3))
+  
+  wave4_ent = sh(spec(nonvide(d@W$W4),f=50,plot = FALSE), alpha =0.5)
+  wave4_sd = sd(nonvide(d@W$W4))
+  
+  return(c(wave1_ent,wave1_sd,wave2_ent,wave2_sd,wave3_ent,
+           wave3_sd,wave4_ent,wave4_sd))
+}
+
+
+### proportions des frequences alpha etc pour EEG
+freq_prop = function(x)
+{
+  x_filtered = ffilter(as.numeric(x),f=50,from = 0, to = 30)
+  pic = as.data.frame(fpeaks(seewave::spec(as.numeric(x_filtered),f = 50,plot = FALSE),plot = FALSE))
+  pic$freq = pic$freq*1000
+  n =  nrow(pic)
+  #alpha waves
+  f_alpha =  subset(pic,pic$freq >= 8 & pic$freq <= 13)
+  alpha = nrow(f_alpha)/n
+  
+  #theta waves
+  f_theta =  subset(pic,pic$freq >= 4 & pic$freq <= 8)
+  theta = nrow(f_theta)/n
+  
+  #delta waves
+  f_delta =  subset(pic,pic$freq >= 0.5 & pic$freq <= 4)
+  delta = nrow(f_delta)/n
+  
+  #beta waves
+  f_beta =  subset(pic,pic$freq >= 13 & pic$freq <= 30)
+  beta = nrow(f_beta)/n
+  
+  return(c(alpha,beta,delta,theta))
+}
+
+### features des frequences alpha etc pour EEG
+freq_feat = function(x)
+{
+  x_filtered = ffilter(as.numeric(x),f=50,from = 0, to = 30)
+  pic = as.data.frame(fpeaks(seewave::spec(as.numeric(x_filtered),f = 50,plot = FALSE),plot = FALSE))
+  pic$freq = pic$freq*1000
+  #all 
+  amp = sum(abs(pic$amp))
+  amp2 = sum(pic$amp^2)
+  m = mean(pic$freq)
+  s = sd(pic$freq)
+  
+  #alpha waves
+  f_alpha =  subset(pic,pic$freq >= 8 & pic$freq <= 13)
+  alpha_amp = sum(abs(f_alpha$amp) )
+  alpha_amp_rel = alpha_amp/amp
+  alpha_m = mean(f_alpha$freq)
+  
+  #theta waves
+  f_theta =  subset(pic,pic$freq >= 4 & pic$freq <= 8)
+  theta_amp = sum(abs(f_theta$amp) ) 
+  theta_amp_rel = theta_amp/amp
+  theta_m = mean(f_theta$freq)
+  
+  #delta waves
+  f_delta =  subset(pic,pic$freq >= 0.5 & pic$freq <= 4)
+  delta_amp = sum(abs(f_delta$amp) )
+  delta_amp_rel = delta_amp/amp
+  delta_m = mean(f_delta$freq)
+  
+  #beta waves
+  f_beta =  subset(pic,pic$freq >= 13 & pic$freq <= 30)
+  beta_amp = sum(abs(f_beta$amp) )
+  beta_amp_rel = beta_amp/amp
+  beta_m = mean(f_beta$freq)
+  
+  return(c(amp,amp2,m,s,
+           alpha_amp,alpha_amp_rel,alpha_m,
+           theta_amp,theta_amp_rel,theta_m,
+           delta_amp,delta_amp_rel,delta_m,
+           beta_amp,beta_amp_rel,beta_m))
+           
+           
+}
+
+alpha = function(x)
+{
+  x_alpha = ffilter(as.numeric(x),f=50,from = 8, to = 13)
+  ent = sh(spec(nonvide(x_alpha),f=50,plot = FALSE), alpha =0.5)
+  mmd = MMD(nonvide(x_alpha))
+  sd = sd(nonvide(x_alpha))
+  return(c(ent,mmd,sd))
+}
+
+```
+
+```{r feat_f}
+print("features_final.R")
+### code de calculs des features sur training et testing sets
+
+#calculer les features 
+calcul_feat_wavelets = function(x,train = TRUE) #x = xtrain ou xtest
+{
+  for (i in c(4:10))
+  {
+    print(i)
+    data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
+    s = apply(data,1,wavelet_coeff4)
+    df = as.data.frame(t(s))
+     colnames(df) = c(paste0("wave1_ent_eeg",i-3),
+                      paste0("wave1_sd_eeg",i-3),
+                      paste0("wave2_ent_eeg",i-3),
+                      paste0("wave2_sd_eeg",i-3),
+                      paste0("wave3_ent_eeg",i-3),
+                      paste0("wave3_sd_eeg",i-3),
+                      paste0("wave4_ent_eeg",i-3),
+                      paste0("wave4_sd_eeg",i-3))
+                     
+    
+    if (train)
+    {
+      df =cbind(ytrain,df)
+      #write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg_R4",i-3,".csv"),row.names = FALSE)
+      write.csv(df,file = paste0("wavelets_coeff_eeg_R4",i-3,".csv"),row.names = FALSE)
+     
+      }
+    else
+      #write.csv(df,file = paste0(data_folder,"wavelets_coeff_eeg_R4",i-3,"_test.csv"),row.names = FALSE)
+      write.csv(df,file = paste0("wavelets_coeff_eeg_R4",i-3,"_test.csv"),row.names = FALSE)
+     
+      
+  }
+  rm(data)
+}
+
+calcul_feat_freq_prop = function(x,train = TRUE) #x = xtrain ou xtest
+{
+  for (i in 4:10)
+  {
+    print(i)
+    data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
+    s = apply(data,1,freq_prop)
+    df = as.data.frame(t(s))
+    colnames(df) = c(paste0("alpha",i-3),
+                     paste0("beta",i-3),
+                     paste0("delta",i-3),
+                     paste0("theta",i-3))
+    
+    if (train)
+    {
+      df =cbind(ytrain,df)
+      #write.csv(df,file = paste0(data_folder,"freq_prop_eeg",i-3,".csv"),row.names = FALSE)
+      write.csv(df,file = paste0("freq_prop_eeg",i-3,".csv"),row.names = FALSE)
+    }
+    else
+      #write.csv(df,file = paste0(data_folder,"freq_prop_egg",i-3,"_test.csv"),row.names = FALSE)
+      write.csv(df,file = paste0("freq_prop_egg",i-3,"_test.csv"),row.names = FALSE)   
+  }
+  rm(data)
+}
+
+calcul_feat_freq = function(x,train = TRUE) #x = xtrain ou xtest
+{
+  for (i in 4:10)
+  {
+    print(i)
+    data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
+    s = apply(data,1,freq_feat)
+    df = as.data.frame(t(s))
+    colnames(df) = c(paste0("amp",i-3),paste0("amp2",i-3),paste0("m",i-3),paste0("s",i-3),
+                     paste0("alpha_amp",i-3),paste0("alpha_amp_rel",i-3),paste0("alpha_m",i-3),
+                     paste0("theta_amp",i-3),paste0("theta_amp_rel",i-3),paste0("theta_m",i-3),
+                     paste0("delta_amp",i-3),paste0("delta_amp_rel",i-3),paste0("delta_m",i-3),
+                     paste0("beta_amp",i-3),paste0("beta_amp_rel",i-3),paste0("beta_m",i-3))
+    
+    if (train)
+    {
+      df =cbind(ytrain,df)
+      write.csv(df,file = paste0(data_folder,"freq_feat_eeg",i-3,".csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("freq_prop_eeg",i-3,".csv"),row.names = FALSE)
+    }
+    else
+      write.csv(df,file = paste0(data_folder,"freq_feat_egg",i-3,"_test.csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("freq_prop_egg",i-3,"_test.csv"),row.names = FALSE)   
+  }
+  rm(data)
+}
+
+calcul_feat_base2 = function(x,train = TRUE) # sur accélerometre et pulsometre
+{
+  if (train)
+    df = ytrain
+  else
+    df = yrandom
+  for (i in 1:11)
+  {
+    print(i)
+    data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
+    s = apply(data,1,val_absolue)
+    dfs = as.data.frame(t(s))
+    colnames(dfs) = c(paste0("mean_abs_",list.datasets(xtrain, recursive = TRUE)[i]),
+                      paste0("max_abs_",list.datasets(xtrain, recursive = TRUE)[i]),
+                      paste0("min_abs_",list.datasets(xtrain, recursive = TRUE)[i]))
+    df = cbind(df,dfs)
+
+  }
+    rm(data)
+    rm(dfs)
+  if (train)
+    {
+      write.csv(df,file = paste0(data_folder,"basic_abs.csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("entropie_Renyi_acc_oxy.csv"),row.names = FALSE)    
+    }
+  else
+    df = df[,3:ncol(df)]
+    write.csv(df,file = paste0(data_folder,"basic_abs_test.csv"),row.names = FALSE)
+    #write.csv(df,file = paste0("entropie_Renyi_acc_oxy_test.csv"),row.names = FALSE)
+    
+}
+
+calcul_feat_alpha = function(x,train = TRUE) #x = xtrain ou xtest
+{
+  for (i in 4:10)
+  {
+    print(i)
+    data = as.data.frame(readDataSet(x[list.datasets(x, recursive = TRUE)[i]]))
+    s = apply(data,1,alpha)
+    df = as.data.frame(t(s))
+    colnames(df) = c(paste0("alpha_ent",i-3),
+                     paste0("alpha_mmd",i-3),
+                     paste0("alpha_sd",i-3))
+    
+    if (train)
+    {
+      df =cbind(ytrain,df)
+      write.csv(df,file = paste0(data_folder,"alpha_eeg",i-3,".csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("freq_prop_eeg",i-3,".csv"),row.names = FALSE)
+    }
+    else
+      write.csv(df,file = paste0(data_folder,"alpha_egg",i-3,"_test.csv"),row.names = FALSE)
+      #write.csv(df,file = paste0("freq_prop_egg",i-3,"_test.csv"),row.names = FALSE)   
+  }
+  rm(data)
+}
+
+
+#rassembler les features dans un seul dataframe
+rassembler_feat = function(train = TRUE)  # features sur ondelettes
+{
+  if (train)
+  {
+    df = read.csv(paste0(data_folder,"wavelets_coeff_eeg_R4_1.csv"))
+    #df = read.csv(paste0("wavelets_coeff_eeg_R4_1.csv"))
+    for (i in 2:7)
+    {
+      data = read.csv(paste0(data_folder,"wavelets_coeff_eeg_R4_",i,".csv"))
+      #data = read.csv(paste0("wavelets_coeff_eeg_R4_",i,".csv"))
+      df = merge(df,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+    }
+    df$sleep_stage = as.factor(df$sleep_stage)
+  }
+  
+  else
+  {
+    df = read.csv(paste0(data_folder,"wavelets_coeff_eeg_R4_1_test.csv"))
+    #df = read.csv(paste0("wavelets_coeff_eeg_R4_1_test.csv"))
+    for (i in 2:7)
+    {
+      data = read.csv(paste0(data_folder,"wavelets_coeff_eeg_R4_",i,"_test.csv"))
+      #data = read.csv(paste0("wavelets_coeff_eeg_R4_",i,"_test.csv"))
+      df =cbind(df,data)
+    }
+  }
+  rm(data)
+  return(df)
+}
+
+rassembler_feat_prop = function(train = TRUE)  #proportions ondes alpha etc
+{
+  if (train)
+  {
+    df = read.csv(paste0(data_folder,"freq_prop_eeg1.csv"))
+    #df = read.csv(paste0("freq_prop_eeg1.csv"))
+    for (i in 2:7) 
+    {
+      data = read.csv(paste0(data_folder,"freq_prop_eeg",i,".csv"))
+
+      #data = read.csv(paste0("freq_prop_eeg",i,".csv"))
+      df = merge(df,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+    }
+    df$sleep_stage = as.factor(df$sleep_stage)
+  }
+  
+  else
+  {
+    df = read.csv(paste0(data_folder,"freq_prop_egg1_test.csv"))
+    #df = read.csv(paste0("freq_prop_egg1_test.csv"))
+    for (i in 2:7) 
+    {
+      data = read.csv(paste0(data_folder,"freq_prop_egg",i,"_test.csv"))
+      #data = read.csv(paste0("freq_prop_egg",i,"_test.csv"))
+      df =cbind(df,data)
+    }
+  }
+  rm(data)
+  return(df)
+}
+
+rassembler_feat_alpha = function(train = TRUE)
+{
+  if (train)
+  {
+    df = read.csv(paste0(data_folder,"alpha_eeg1.csv"))
+    #df = read.csv(paste0("freq_prop_eeg1.csv"))
+    for (i in 2:7) 
+    {
+     data = read.csv(paste0(data_folder,"alpha_eeg",i,".csv"))
+      
+      #data = read.csv(paste0("freq_prop_eeg",i,".csv"))
+      df = merge(df,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+    }
+    df$sleep_stage = as.factor(df$sleep_stage)
+  }
+  
+  else
+  {
+    df = read.csv(paste0(data_folder,"alpha_egg1_test.csv"))
+    #df = read.csv(paste0("freq_prop_egg1_test.csv"))
+    for (i in 2:7) 
+    {
+      data = read.csv(paste0(data_folder,"alpha_egg",i,"_test.csv"))
+      #data = read.csv(paste0("freq_prop_egg",i,"_test.csv"))
+      df =cbind(df,data)
+    }
+  }
+  rm(data)
+  return(df)
+}
+
+rassembler_feat_freq = function(train = TRUE)  #features sur ondes alpha etc
+{
+  if (train)
+  {
+    df = read.csv(paste0(data_folder,"freq_feat_eeg1.csv"))
+    #df = read.csv(paste0("freq_feat_eeg1.csv"))
+    for (i in 2:7) 
+    {
+      data = read.csv(paste0(data_folder,"freq_feat_eeg",i,".csv"))
+      
+      #data = read.csv(paste0("freq_feat_eeg",i,".csv"))
+      df = merge(df,data,by=c("id","sleep_stage"),all.x = TRUE,all.y = TRUE)
+    }
+    df$sleep_stage = as.factor(df$sleep_stage)
+  }
+  
+  else
+  {
+    df = read.csv(paste0(data_folder,"freq_feat_egg1_test.csv"))
+    #df = read.csv(paste0("freq_feat_egg1_test.csv"))
+    for (i in 2:7) 
+    {
+      data = read.csv(paste0(data_folder,"freq_feat_egg",i,"_test.csv"))
+      #data = read.csv(paste0("freq_feat_egg",i,"_test.csv"))
+      df =cbind(df,data)
+    }
+  }
+  rm(data)
+  return(df)
+}
+
+```
+
+```{r source}
+print("source_finale.R")
+##### Code de création et test du modèle
+
+## library à charger
+# library(h5,warn.conflicts = FALSE)
+# library(wavelets)
+# library(randomForest)
+# library(seewave)
+# 
+# ## variables
+# data_folder = "C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Machine Learning/Challenge/Data/"
+# file_folder = "C:/Users/Admin/Documents/GitHub/Challenge_MLC/"
+# 
+# # data_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
+# # file_folder = "C:/Users/trace/Documents/GitHub/Challenge_MLC/"
+# 
+# ytrain = read.csv(paste0(data_folder,"train_y.csv"))
+# yrandom = read.csv(paste0(data_folder,"sample_submission.csv"))
+# xtrain = h5file(name = paste0(data_folder,"train.h5/train.h5"))
+# xtest = h5file(name = paste0(data_folder,"test.h5/test.h5"))
+# 
+# 
+# ## fichiers à charger
+# source(paste0(file_folder,"fonctions_final.R"))
+# source(paste0(file_folder,"features_final.R"))
+# 
+# ## calcul des features et enregistrement des dataframes
+# calcul_feat_base2(xtrain)
+# calcul_feat_base2(xtest, train = FALSE)
+# 
+# calcul_feat_wavelets(xtrain)
+# calcul_feat_wavelets(xtest,train = FALSE)
+# 
+# calcul_feat_alpha(xtrain)
+# calcul_feat_alpha(xtest, train = FALSE)
+# 
+# calcul_feat_freq(xtrain)
+# calcul_feat_freq(xtest, train = FALSE)
+# 
+# calcul_feat_freq_prop(xtrain)
+# calcul_feat_freq_prop(xtest, train = FALSE)
+# 
+# ## création du modèle RF
+# 
+# dfw = rassembler_feat() #entropie de Renyi et écart types sur décompo en ondelettes des eeg
+# df_abs = read.csv(paste0(data_folder,"basic_abs.csv")) #basic features (min/max de la val absolue du signal)
+# dfp = rassembler_feat_prop()  # proportions des ondes alpha, theta etc sur eeg
+# dfa = rassembler_feat_alpha() # features sur ondes alpha (eeg)
+# df = rassembler_feat_freq()  # features sur andes de frequences alpha theta etc sur eeg
+# 
+# 
+# df[is.na(df)] = 0 #setting NA values to zero
+# df = merge(df,dfw, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+# df = merge(df,df_abs, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+# df = merge(df,dfa, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+# df = merge(df,dfp, by =c("id","sleep_stage"),all.x = TRUE, all.y = TRUE)
+# 
+# 
+# #Variables d'importance 
+# 
+# imp = read.csv(paste0(data_folder,"imp2.csv"))
+# imp[,1] = as.character(imp[,1])
+# 
+# 
+# f_RandomForest3 = randomForest(sleep_stage~.,
+#                                data=df[,c("sleep_stage",subset(imp,imp[,2] > 100)[,1])],ntree=700,mtry = 48)
+# print(f_RandomForest3)  ##meilleur modele
+# 
+# ## individus out of bags
+# hist(f_RandomForest3$oob.times)
+# ## importance des variables
+# varImpPlot(f_RandomForest3)
+# 
+# 
+# #prediction
+# dft = rassembler_feat(train = FALSE) ##ent Renyi et sd sur vaguelettes
+# df_alp = rassembler_feat_alpha(train = FALSE)
+# dftp = rassembler_feat_prop(train = FALSE)
+# abs_t = read.csv(paste0(data_folder,"basic_abs_test.csv"))
+# dftest = rassembler_feat_freq(train = FALSE)
+# dftest[is.na(dftest)] = 0 #setting NA values to zero
+# 
+# dftest = cbind(dftest,dft)
+# dftest = cbind(dftest,abs_t)
+# dftest = cbind(dftest,df_alp)
+# dftest = cbind(dftest,dftp)
+# 
+# 
+# ytest = as.data.frame(predict(f_RandomForest3,dftest[,subset(imp,imp[,2] > 100)[,1]]))
+# ytest = cbind(yrandom[,1],ytest)
+# colnames(ytest) =  c("id","sleep_stage")
+# 
+# write.csv(ytest,file = paste0(data_folder,"ytest_final.csv"),row.names = FALSE)
+
+```
